@@ -2,7 +2,7 @@
 
 轻松地构建一个画板或批注功能，在现有的dom的基础上
 
-# features
+# 功能
 
 1. 支持自定义画笔
 2. 支持设置颜色
@@ -12,7 +12,7 @@
 
 [查看示例](http://inu1255.gitee.io/easy-painter/example/)
 
-## get start
+## 入门
 
 ``` javascript
 var div = document.getElementById("root")
