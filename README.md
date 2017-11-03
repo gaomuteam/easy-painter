@@ -1,14 +1,14 @@
 # easy-painter
 
-轻松地构建一个画板或批注功能，在现有的dom的基础上
+轻松地构建一个画板或批注功能，在现有的dom的基础上
 
 # 功能
 
 1. 支持自定义画笔
 2. 支持设置颜色
-3. 支持撤消和重做
+3. 支持撤消和重做
 4. 支持序列化和反序列化
-5. 内置铅笔、直线、矩形、椭圆、橡皮擦等画笔
+5. 内置铅笔、直线、矩形、椭圆、橡皮擦等画笔
 
 [查看示例](http://inu1255.gitee.io/easy-painter/example/)
 
@@ -16,7 +16,7 @@
 
 ``` javascript
 var div = document.getElementById("root")
-// 在div上添加画板，画板会自动适应div的位置和大小
+// 在div上添加画板，画板会自动适应div的位置和大小
 var drawer = new paint.Drawer(div)
 // 为画板添加菜单，你也可以用自己的菜单
 var menu = new paint.Menu(drawer).addPens().undo().scale().moveable()
@@ -47,17 +47,17 @@ var menu = new paint.Menu(drawer).addPens().undo().scale().moveable()
 启用画板
 
 #### paint.Drawer.setPen(pen:String|penClass|undefined)
-设置画笔  
-`pen`: 画笔类或者画笔名，不传参数启用默认画笔
+设置画笔  
+`pen`: 画笔类或者画笔名，不传参数启用默认画笔
 
 #### paint.Drawer.getCtx()
 获取画板的Context2D
 
 #### paint.Drawer.getCanvas()
-获取画板的canvas
+获取画板的canvas
 
 #### paint.Drawer.setColor(color)
-设置画笔颜色  
+设置画笔颜色  
 *`color`: 颜色 red #f00 rgba(0,0,0,0)  
 相当于  
 ``` js
@@ -74,22 +74,22 @@ return: {top,left,bottom,right}
 
 #### paint.Drawer.parse(json)
 从json字符串中恢复画板数据
-*`json`: json字符串或数据数组
+*`json`: json字符串或数据数组
 
 #### paint.Drawer.undo
 撤销
-`test`: test为true时，不会实际操作, 返回是否可以撤销
+`test`: test为true时，不会实际操作, 返回是否可以撤销
 
 #### paint.Drawer.redo(test)
-重做
-`test`: test为true时，不会实际操作, 返回是否可以重做
+重做
+`test`: test为true时，不会实际操作, 返回是否可以重做
 
 #### paint.Drawer.update()
 刷新画板，强制重绘
 
 #### paint.Drawer.scale(n)
-缩放dom和画板，实际上会修改dom.style.transform
-*`n`: 缩放倍数
+缩放dom和画板，实际上会修改dom.style.transform
+*`n`: 缩放倍数
 
 #### paint.Drawer.toDataURL
 相当于canvas.toDataURL()
@@ -97,7 +97,7 @@ return: {top,left,bottom,right}
 ### paint.pens 画笔盒
 
 #### paint.pens.get(key)
-通过画笔名,获取画笔，不存在时返回铅笔  
+通过画笔名,获取画笔，不存在时返回铅笔  
 *`key`: 画笔名
 
 #### paint.pens.set(key,penClass)
@@ -109,24 +109,24 @@ return: {top,left,bottom,right}
 获取画笔类的画笔名
 
 #### paint.pens.keys()
-获取所有画笔的画笔名
+获取所有画笔的画笔名
 
 ### penClass 画笔类
-可以通过创建画笔类来创建自定义画笔
+可以通过创建画笔类来创建自定义画笔
 
 下面以自定义一个打勾的画笔为例
 ``` js
 /**
  * 画笔构造函数
- * @param {function} render 渲染当前作画数据
+ * @param {function} render 渲染当前作画数据
  * @param {function} resolve 作画完成，提交本次作画数据
  */
 function oPen(render, resolve) {
-    // 当鼠标按下时触发，bx,by 起点相对于画板的坐标
+    // 当鼠标按下时触发，bx,by 起点相对于画板的坐标
     this.begin = function(bx, by) {
         render([bx, by]);
     };
-    // 当鼠标按下移动时触发，ex,ey 终点相对于画板的坐标
+    // 当鼠标按下移动时触发，ex,ey 终点相对于画板的坐标
     this.move = function(bx, by, ex, ey) {
         render([bx, by, ex, ey]);
     };
@@ -139,7 +139,7 @@ function oPen(render, resolve) {
 oPen.moveBegin = true;
 // 鼠标移出画板区域触发this.end
 oPen.outEnd = false;
-// 鼠标在画板区域时的光标样式
+// 鼠标在画板区域时的光标样式
 oPen.cursor = 'auto';
 // 重点：将数据绘制到画板上
 oPen.render = function(ctx, data) {
@@ -151,5 +151,5 @@ oPen.render = function(ctx, data) {
     }
 };
 ```
-**提示1**: 为了序列化时节省空间，**render和resolve返回的数据必须是数组**,数组中可以有其它类型的数据  
-**提示2**: 为了缩放后作画位置不变，bx,by,ex,ey实际为相对于画板万分比，在penClass.render时data中恢复为实际坐标；为了正确地恢复数据，**请保证render和resolve返回的数据中x轴的下标为偶数，y轴的下标为奇数**
+**提示1**: 为了序列化时节省空间，**render和resolve返回的数据必须是数组**,数组中可以有其它类型的数据  
+**提示2**: 为了缩放后作画位置不变，bx,by,ex,ey实际为相对于画板万分比，在penClass.render时data中恢复为实际坐标；为了正确地恢复数据，**请保证render和resolve返回的数据中x轴的下标为偶数，y轴的下标为奇数**
