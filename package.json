@@ -1,0 +1,40 @@
+{
+  "name": "easy-painter",
+  "version": "1.0.0",
+  "description": "a web painter by canvas,easy to use and extends",
+  "main": "./dist/paint.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inu1255/easy-painter.git"
+  },
+  "keywords": [
+    "painter",
+    "canvas"
+  ],
+  "author": "inu1255",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inu1255/easy-painter/issues"
+  },
+  "homepage": "https://github.com/inu1255/easy-painter#readme",
+  "dependencies": {
+    "autoprefixer": "^7.1.6",
+    "babel-loader": "^7.1.2",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.5",
+    "less-loader": "^4.0.5",
+    "postcss-loader": "^2.0.8",
+    "style-loader": "^0.19.0",
+    "url-loader": "^0.6.2"
+  },
+  "devDependencies": {
+    "babel-preset-latest": "^6.24.1",
+    "less": "^2.7.3",
+    "postcss-flexbugs-fixes": "^3.2.0",
+    "webpack": "^3.8.1",
+    "yargs": "^10.0.3"
+  }
+}
