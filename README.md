@@ -10,7 +10,7 @@
 4. 支持序列化和反序列化
 5. 内置铅笔、直线、矩形、椭圆、橡皮擦等画笔
 
-[查看示例]()
+[查看示例](http://inu1255.gitee.io/easy-painter/example/)
 
 ## get start
 
