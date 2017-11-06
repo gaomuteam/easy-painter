@@ -40,7 +40,7 @@ function Menu(drawer) {
     this.moveable = function() {
         var btn = document.createElement("div");
         btn.className = "painter-menu__move";
-        var drag = new Drag(btn, menu).start();
+        var drag = new Drag(btn, menu).moveTo(offset).start();
         drag.addEventListener("begin", function() {
             drawer.disable();
         });
@@ -130,7 +130,7 @@ function Menu(drawer) {
     };
     this.restore = function(s) {
         this.restore.count++;
-            var btn = document.createElement("div");
+        var btn = document.createElement("div");
         btn.className = "painter-menu__btn";
         btn.innerText = "恢复" + this.restore.count;
         btn.addEventListener("click", () => {

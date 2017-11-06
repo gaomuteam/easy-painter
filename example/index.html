@@ -101,6 +101,7 @@
         paint.pens.set("oPen", oPen)
         paint.pens.set("xPen", xPen)
         var dom = document.getElementById("root")
+        dom = dom.querySelector("img")
         var drawer = new paint.Drawer(dom)
         var menu = new paint.Menu(drawer).addPens().color().undo().scale().clear().save().moveable()
     </script>

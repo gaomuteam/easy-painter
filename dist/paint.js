@@ -973,6 +973,14 @@ function drawer(dom, config) {
     _Event2.default.call(this);
     var canvas = document.createElement('canvas');
     canvas.className = "painter-canvas";
+    var parent = dom;
+    if (dom instanceof HTMLImageElement) {
+        parent = document.createElement("div");
+        Object.assign(parent.style, dom.style);
+        dom.parentElement.insertBefore(parent, dom);
+        dom.parentElement.removeChild(dom);
+        parent.appendChild(dom);
+    }
     var ctx = canvas.getContext("2d");
     // 读取配置
     config = newConfig(config);
@@ -1004,7 +1012,7 @@ function drawer(dom, config) {
         var e = normalizeEvent(event, canvas);
         var ppap = getPen();
         // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
-        if (!beginPoint && e.buttons == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
+        if (!beginPoint && event.buttons == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
         if (!beginPoint) return;
         if (typeof ppap.move == "function") {
             ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
@@ -1027,20 +1035,21 @@ function drawer(dom, config) {
         event.preventDefault();
     }
 
-    function mouseover(e) {
+    function mouseover(event) {
         if (config.penClass.outEnd) {
             // 在out时已经end了
-        } else if (e.buttons != 1) {
+        } else if (event.buttons != 1) {
             end(outPoint, "mouseover");
         }
         outPoint = false;
     }
 
-    function mouseout(e) {
+    function mouseout(event) {
+        var e = normalizeEvent(event, canvas);
         outPoint = { x: e.offsetX, y: e.offsetY };
         if (config.penClass.outEnd) {
             end(outPoint, "mouseout");
-        } else if (e.buttons == 1) {
+        } else if (event.buttons == 1) {
             mousemove(e);
         }
     }
@@ -1058,9 +1067,9 @@ function drawer(dom, config) {
             div.className = "painter-canvas__item";
             if (x != null) div.style.left = warpData(x, canvas) + "px";
             if (y != null) div.style.top = warpData(y, canvas, 1) + "px";
-            dom.appendChild(div);
+            parent.appendChild(div);
         }
-        return dom;
+        return parent;
     };
     var createNewPen = function createNewPen() {
         // 设置画笔鼠标指针样式
@@ -1191,9 +1200,9 @@ function drawer(dom, config) {
     };
     createNewPen();
 
-    dom.appendChild(canvas);
-    if (getComputedStyle(dom).position === "static") {
-        dom.style.position = "relative";
+    parent.appendChild(canvas);
+    if (getComputedStyle(parent).position === "static") {
+        parent.style.position = "relative";
     }
     this.resize();
 }
@@ -1555,7 +1564,7 @@ function Menu(drawer) {
     this.moveable = function () {
         var btn = document.createElement("div");
         btn.className = "painter-menu__move";
-        var drag = new _Drag2.default(btn, menu).start();
+        var drag = new _Drag2.default(btn, menu).moveTo(offset).start();
         drag.addEventListener("begin", function () {
             drawer.disable();
         });
@@ -1758,6 +1767,15 @@ function Drag(lis, aim) {
             _this.state.end = { left: left, top: top };
             _this.dispatchEvent("end", { left: left, top: top });
         }
+    };
+    this.moveTo = function (_ref) {
+        var left = _ref.left,
+            top = _ref.top;
+
+        aim.style.left = left + "px";
+        aim.style.top = top + "px";
+        _this.state.end = { left: left, top: top };
+        return _this;
     };
     this.start = function () {
         lis.addEventListener("mousedown", this.begin);

@@ -54,6 +54,12 @@ function Drag(lis, aim) {
             this.dispatchEvent("end", { left, top });
         }
     };
+    this.moveTo = ({left, top}) => {
+        aim.style.left = left + "px";
+        aim.style.top = top + "px";
+        this.state.end = { left, top };
+        return this;
+    };
     this.start = function() {
         lis.addEventListener("mousedown", this.begin);
         document.addEventListener("mousemove", this.move);
