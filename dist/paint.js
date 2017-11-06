@@ -1532,6 +1532,16 @@ function Menu(drawer) {
     menu.style.top = offset.top + "px";
     menu.style.left = offset.left + "px";
     document.body.appendChild(menu);
+    this.addButton = function (html, cb) {
+        if (html && cb) {
+            var btn = document.createElement("div");
+            btn.className = "painter-menu__btn";
+            btn.innerText = html;
+            btn.addEventListener("click", cb);
+            menu.appendChild(btn);
+            return btn;
+        }
+    };
     this.addPens = function (keys) {
         var _this = this;
 
@@ -1574,106 +1584,68 @@ function Menu(drawer) {
         return this;
     };
     this.undo = function () {
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "撤销";
-        btn.addEventListener("click", function () {
+        this.addButton("撤销", function () {
             drawer.undo();
         });
-        menu.appendChild(btn);
-
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "重做";
-        btn.addEventListener("click", function () {
+        this.addButton("重做", function () {
             drawer.redo();
         });
-        menu.appendChild(btn);
         return this;
     };
     this.scale = function () {
         var scale = 1;
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "放大";
-        btn.addEventListener("click", function () {
+        this.addButton("放大", function () {
             scale *= 1.1;
             drawer.scale(scale);
         });
-        menu.appendChild(btn);
-
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "缩小";
-        btn.addEventListener("click", function () {
+        this.addButton("缩小", function () {
             scale /= 1.1;
             drawer.scale(scale);
         });
-        menu.appendChild(btn);
         return this;
     };
-    this.color = function () {
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.style.color = "red";
-        btn.innerText = "红色";
-        btn.addEventListener("click", function () {
-            drawer.setColor("red");
-        });
-        menu.appendChild(btn);
+    this.color = function (colors) {
+        var _this2 = this;
 
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.style.color = "yellow";
-        btn.innerText = "黄色";
-        btn.addEventListener("click", function () {
-            drawer.setColor("yellow");
+        colors = colors || [["red", "红色"], ["yellow", "黄色"], ["blue", "蓝色"]];
+        colors.forEach(function (item) {
+            var btn = _this2.addButton(item[1], function () {
+                drawer.setColor(item[0]);
+                btn.className += " active";
+                if (_this2.color.prev) {
+                    _this2.color.prev.className = _this2.color.prev.className.replace(" active", "");
+                }
+                _this2.color.prev = btn;
+            });
+            btn.style.color = item[0];
+            if (!_this2.color.prev) {
+                _this2.color.prev = btn;
+                btn.className += " active";
+            }
         });
-        menu.appendChild(btn);
-
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.style.color = "blue";
-        btn.innerText = "蓝色";
-        btn.addEventListener("click", function () {
-            drawer.setColor("blue");
-        });
-        menu.appendChild(btn);
         return this;
     };
     this.clear = function () {
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "清空";
-        btn.addEventListener("click", function () {
+        this.addButton("清空", function () {
             drawer.parse([]);
         });
-        menu.appendChild(btn);
         return this;
     };
     this.restore = function (s) {
         this.restore.count++;
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "恢复" + this.restore.count;
-        btn.addEventListener("click", function () {
+        this.addButton("恢复" + this.restore.count, function () {
             drawer.parse(s);
         });
-        menu.appendChild(btn);
         return this;
     };
     this.restore.count = 0;
     this.save = function () {
-        var _this2 = this;
+        var _this3 = this;
 
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__btn";
-        btn.innerText = "保存";
-        btn.addEventListener("click", function () {
-            _this2.restore(drawer.stringify());
+        this.addButton("保存", function () {
+            _this3.restore(drawer.stringify());
             drawer.parse([]);
         });
-        menu.appendChild(btn);
         return this;
     };
     this.disable = function () {
