@@ -73,17 +73,16 @@
 
     paint.Paint = function(dom, history) {
         var drawer = new paint.Drawer(dom);
-        var menu;
         drawer.preview = function() {
             drawer.disable();
-            if (menu) menu.disable();
+            if (drawer.menu) drawer.menu.disable();
         };
         drawer.edit = function() {
             drawer.enable();
-            if (!menu) {
-                menu = new paint.Menu(drawer).addPens(ppap).color().undo().scale().clear().save().moveable();
+            if (!drawer.menu) {
+                drawer.menu = new paint.Menu(drawer).addPens(ppap).color().undo().scale().clear().save().moveable();
             }
-            menu.enable();
+            drawer.menu.enable();
         };
         if (history) {
             drawer.parse(history);
