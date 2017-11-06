@@ -43,8 +43,9 @@
             <p>这是一个题目</p>
             <p>这是一个题目</p>
             <p>这是一个题目</p>
+            <img id="i1" src="demo.png" alt="">
             <p>这是一个题目</p>
-            <img src="demo.png" alt="">
+            <img id="i2" src="demo.png" alt="">
             <p>这是一个题目</p>
             <p>这是一个题目</p>
             <p>这是一个题目</p>
@@ -54,56 +55,10 @@
         </div>
     </div>
     <script src="../dist/paint.js"></script>
+    <script src="./index.js"></script>
     <script>
-        function pow2(x) {
-            return x * x
-        }
-
-        function oPen(render, resolve) {
-            this.begin = function(bx, by) {
-                render([bx, by]);
-            };
-            this.move = function(bx, by, ex, ey) {
-                render([bx, by, ex, ey]);
-            };
-            this.end = function(bx, by, ex, ey) {
-                resolve([bx, by, ex, ey]);
-            };
-        }
-        oPen.moveBegin = true;
-        oPen.render = function(ctx, data) {
-            if (data && data.length >= 2) {
-                var dis = 16 + (data.length === 4 ? Math.sqrt(pow2(data[0] - data[2]) + pow2(data[1] - data[3])) : 0)
-                ctx.font = `${dis}px serif`
-                ctx.fillText("√", data[0], data[1] + dis / 2);
-            }
-        };
-
-        function xPen(render, resolve) {
-            this.begin = function(bx, by) {
-                render([bx, by]);
-            };
-            this.move = function(bx, by, ex, ey) {
-                render([bx, by, ex, ey]);
-            };
-            this.end = function(bx, by, ex, ey) {
-                resolve([bx, by, ex, ey]);
-            };
-        }
-        xPen.moveBegin = true;
-        xPen.render = function(ctx, data) {
-            if (data && data.length >= 2) {
-                var dis = 16 + (data.length === 4 ? Math.sqrt(pow2(data[0] - data[2]) + pow2(data[1] - data[3])) : 0)
-                ctx.font = `${dis}px serif`
-                ctx.fillText("×", data[0], data[1] + dis / 2);
-            }
-        };
-        paint.pens.set("oPen", oPen)
-        paint.pens.set("xPen", xPen)
-        var dom = document.getElementById("root")
-        dom = dom.querySelector("img")
-        var drawer = new paint.Drawer(dom)
-        var menu = new paint.Menu(drawer).addPens().color().undo().scale().clear().save().moveable()
+        var d1 = paint.Paint(document.getElementById("i1"))
+        var d2 = paint.Paint(document.getElementById("i2"),[{"key":"rectPen","data":[3906,4211,6171,6371],"style":{}}])
     </script>
 </body>
 

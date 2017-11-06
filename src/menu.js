@@ -6,7 +6,6 @@ var body = document.body || document.documentElement;
 function Menu(drawer) {
     var menu = document.createElement("div");
     menu.className = "painter-menu";
-    menu.style.position = "fixed";
     var offset = drawer.offset();
     menu.style.top = offset.top + "px";
     menu.style.left = offset.left + "px";
@@ -149,6 +148,14 @@ function Menu(drawer) {
             drawer.parse([]);
         });
         menu.appendChild(btn);
+        return this;
+    };
+    this.disable = function() {
+        document.body.removeChild(menu);
+        return this;
+    };
+    this.enable = function() {
+        document.body.appendChild(menu);
         return this;
     };
 }
