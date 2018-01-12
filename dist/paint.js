@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -86,7 +86,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _defaultPen = __webpack_require__(10);
+var _defaultPen = __webpack_require__(11);
 
 var _defaultPen2 = _interopRequireDefault(_defaultPen);
 
@@ -170,6 +170,336 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Event = __webpack_require__(2);
+
+var _Event2 = _interopRequireDefault(_Event);
+
+var _pens = __webpack_require__(0);
+
+var _pens2 = _interopRequireDefault(_pens);
+
+var _Offset = __webpack_require__(3);
+
+var _Offset2 = _interopRequireDefault(_Offset);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var defaultPen = _pens2.default.get();
+
+var Drawer = function () {
+    function Drawer(dom, config) {
+        var _this = this;
+
+        _classCallCheck(this, Drawer);
+
+        _Event2.default.call(this);
+        var canvas = this.canvas = this.createCanvas();
+        var parent = this.dom = dom;
+        if (dom instanceof HTMLImageElement) {
+            parent = document.createElement("div");
+            Object.assign(parent.style, dom.style);
+            dom.parentElement.insertBefore(parent, dom);
+            dom.parentElement.removeChild(dom);
+            parent.appendChild(dom);
+        }
+        config = this.config = Object.assign(this.defaultConfig(), config);
+        this.init();
+
+        // 画笔实例
+        var pen;
+        // 鼠标按下位置
+        var beginPoint = false;
+        // 鼠标out位置
+        this.outPoint = false;
+
+        this.setData = function (data) {
+            if (typeof data == "undefined") return;
+            _this.config.penData = data;
+            _this.update();
+        };
+
+        function getPen() {
+            return pen;
+        }
+
+        var mousedown = function mousedown(event) {
+            var e = _this.normalizeEvent(event, config);
+            var ppap = getPen();
+            if (!beginPoint) beginPoint = { x: e.offsetX, y: e.offsetY };
+            if (typeof ppap.begin == "function") {
+                ppap.begin(beginPoint.x, beginPoint.y);
+            }
+            event.preventDefault();
+        };
+
+        var mousemove = function mousemove(event) {
+            var e = _this.normalizeEvent(event, config);
+            // console.log("move", e.offsetX, e.offsetY);
+            var ppap = getPen();
+            // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
+            if (!beginPoint && event.buttons == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
+            if (!beginPoint) return;
+            if (typeof ppap.move == "function") {
+                ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
+            }
+            event.preventDefault && event.preventDefault();
+        };
+
+        var end = this.end = function (endPoint, callBy) {
+            if (!beginPoint) return;
+            var ppap = getPen();
+            if (typeof ppap.end == "function") {
+                ppap.end(beginPoint.x, beginPoint.y, endPoint.x, endPoint.y, callBy);
+            }
+            beginPoint = false;
+        };
+
+        var mouseup = function mouseup(event) {
+            var e = _this.normalizeEvent(event, config);
+            end({ x: e.offsetX, y: e.offsetY });
+            event.preventDefault();
+        };
+
+        var mouseover = function mouseover(event) {
+            if (config.penClass.outEnd) {
+                // 在out时已经end了
+            } else if (_this.outPoint && event.buttons != 1) {
+                end(_this.outPoint, "mouseover");
+            }
+            _this.outPoint = false;
+        };
+
+        var mouseout = function mouseout(event) {
+            var e = _this.normalizeEvent(event, config);
+            // console.log("out", e.offsetX, e.offsetY);
+            _this.outPoint = { x: e.offsetX, y: e.offsetY };
+            if (event.toElement.parentElement == canvas) {
+                // console.log(this.outPoint);
+            } else if (config.penClass.outEnd) {
+                end(_this.outPoint, "mouseout");
+            } else if (event.buttons == 1) {
+                mousemove(e);
+            }
+        };
+        canvas.addEventListener("mousedown", mousedown);
+        canvas.addEventListener("mousemove", mousemove);
+        canvas.addEventListener("mouseup", mouseup);
+        canvas.addEventListener("touchstart", mousedown);
+        canvas.addEventListener("touchmove", mousemove);
+        canvas.addEventListener("touchend", mouseup);
+        canvas.addEventListener("mouseover", mouseover);
+        canvas.addEventListener("mouseout", mouseout);
+
+        var append = function append(div, x, y) {
+            if (div) {
+                div.className = "painter-canvas__item";
+                if (x != null) div.style.left = _this.warpData(x, canvas) + "px";
+                if (y != null) div.style.top = _this.warpData(y, canvas, 1) + "px";
+                parent.appendChild(div);
+            }
+            return parent;
+        };
+        var createNewPen = this.createNewPen = function () {
+            // 设置画笔鼠标指针样式
+            if (pen && typeof pen.unmount === "function") pen.unmount();
+            canvas.style.cursor = config.penClass.cursor || 'auto';
+            pen = new config.penClass(_this.setData, penSuccess, append, _this);
+        };
+        // 画笔绘制结束回调
+        var penSuccess = function penSuccess(data) {
+            _this.dispatchEvent('success', data);
+            createNewPen();
+            if (typeof data != "undefined") {
+                config.history.push({ key: _pens2.default.key(config.penClass), data: data, style: _this.getStyle() });
+                config.penData = undefined;
+                config.redo.length = 0;
+                _this.update();
+            }
+        };
+        createNewPen();
+        parent.appendChild(canvas);
+        if (getComputedStyle(parent).position === "static") {
+            parent.style.position = "relative";
+        }
+        this.resize();
+    }
+
+    _createClass(Drawer, [{
+        key: 'defaultConfig',
+        value: function defaultConfig() {
+            return {
+                history: [],
+                redo: [],
+                penClass: defaultPen
+            };
+        }
+    }, {
+        key: 'warpData',
+        value: function warpData(data, i) {
+            var config = this.config;
+            if (data instanceof Array) {
+                var list = [];
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    list.push(this.warpData(item, i));
+                }
+                return list;
+            }
+            if (typeof data === "number") {
+                return (i & 1 ? config.height : config.width) * data / 10000;
+            }
+            return data;
+        }
+    }, {
+        key: 'normalizeEvent',
+        value: function normalizeEvent(e, config) {
+            if (e.normalized) {
+                return e;
+            }
+            if (e instanceof TouchEvent) {
+                var off = (0, _Offset2.default)(e.target);
+                var offsetX = Math.floor((e.touches[0].pageX - off.top) / config.width * 10000);
+                var offsetY = Math.floor((e.touches[0].pageY - off.left) / config.height * 10000);
+                return { offsetX: offsetX, offsetY: offsetY, normalized: true };
+            } else {
+                var offsetX = Math.floor(e.offsetX / config.width * 10000);
+                var offsetY = Math.floor(e.offsetY / config.height * 10000);
+                return { offsetX: offsetX, offsetY: offsetY, normalized: true };
+            }
+        }
+    }, {
+        key: 'setPen',
+        value: function setPen(penClass) {
+            // 模拟mouseup
+            this.end(this.outPoint, "setPen");
+            // 设置为默认画笔
+            if (typeof penClass == "undefined") penClass = defaultPen;
+            var tmp = _pens2.default.get(penClass);
+            if (tmp) {
+                // 清除没有完成的画笔数据
+                if (this.config.penClass != tmp) {
+                    this.config.penClass = tmp;
+                    this.config.penData = undefined;
+                }
+                // 创建画笔
+                this.createNewPen();
+            } else {
+                console.log("不能识别的画笔", penClass);
+            }
+        }
+    }, {
+        key: 'stringify',
+        value: function stringify() {
+            return JSON.stringify(this.config.history);
+        }
+    }, {
+        key: 'parse',
+        value: function parse(data) {
+            if (typeof data === "string") {
+                this.config.history = JSON.parse(data);
+            } else if (data instanceof Array) {
+                this.config.history = data;
+            } else {
+                return;
+            }
+            this.update(true);
+        }
+    }, {
+        key: 'undo',
+        value: function undo(test) {
+            if (this.config.history.length > 0) {
+                if (test) return true;
+                this.config.redo.push(this.config.history.pop());
+                this.update(true);
+            }
+        }
+    }, {
+        key: 'redo',
+        value: function redo(test) {
+            if (this.config.redo.length > 0) {
+                if (test) return true;
+                this.config.history.push(this.config.redo.pop());
+                this.update();
+            }
+        }
+    }, {
+        key: 'getCanvas',
+        value: function getCanvas() {
+            return this.canvas;
+        }
+    }, {
+        key: 'resize',
+        value: function resize() {
+            var modify = false;
+            var dom = this.dom,
+                config = this.config;
+
+            if (dom.offsetWidth != config.width) {
+                modify = true;
+                config.width = dom.scrollWidth || dom.offsetWidth;
+            }
+            if (dom.offsetHeight != config.height) {
+                modify = true;
+                config.height = dom.scrollHeight || dom.offsetHeight;
+            }
+            return modify;
+        }
+    }, {
+        key: 'offset',
+        value: function offset() {
+            return (0, _Offset2.default)(this.canvas);
+        }
+    }, {
+        key: 'disable',
+        value: function disable() {
+            this.canvas.style.pointerEvents = "none";
+        }
+    }, {
+        key: 'enable',
+        value: function enable() {
+            this.canvas.style.pointerEvents = "auto";
+        }
+    }, {
+        key: 'scale',
+        value: function scale(n) {
+            this.canvas.parentElement.style.transformOrigin = "50% 0 0";
+            this.canvas.parentElement.style.transform = 'scale(' + n + ')'; // translate(${})`;
+            this.update();
+        }
+    }, {
+        key: 'init',
+        value: function init() {}
+    }, {
+        key: 'createCanvas',
+        value: function createCanvas() {}
+    }, {
+        key: 'getStyle',
+        value: function getStyle() {}
+    }, {
+        key: 'update',
+        value: function update() {}
+    }]);
+
+    return Drawer;
+}();
+
+exports.default = Drawer;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 function Event() {
     var _listeners = {};
     // 添加
@@ -218,7 +548,7 @@ function Event() {
 exports.default = Event;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -240,7 +570,7 @@ function offset(who) {
 exports.default = offset;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -249,36 +579,44 @@ exports.default = offset;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.pens = exports.Menu = exports.Drawer = undefined;
+exports.pens = exports.Menu = exports.DrawerCanvas = exports.DrawerSvg = exports.Drawer = undefined;
 
-__webpack_require__(4);
+__webpack_require__(5);
 
-var _drawer = __webpack_require__(9);
+var _drawerSvg = __webpack_require__(10);
 
-var _drawer2 = _interopRequireDefault(_drawer);
+var _drawerSvg2 = _interopRequireDefault(_drawerSvg);
+
+var _drawerCanvas = __webpack_require__(18);
+
+var _drawerCanvas2 = _interopRequireDefault(_drawerCanvas);
 
 var _pens = __webpack_require__(0);
 
 var _pens2 = _interopRequireDefault(_pens);
 
-var _Menu = __webpack_require__(18);
+var _Menu = __webpack_require__(19);
 
 var _Menu2 = _interopRequireDefault(_Menu);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.Drawer = _drawer2.default;
+var Drawer = _drawerCanvas2.default;
+
+exports.Drawer = Drawer;
+exports.DrawerSvg = _drawerSvg2.default;
+exports.DrawerCanvas = _drawerCanvas2.default;
 exports.Menu = _Menu2.default;
 exports.pens = _pens2.default;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(5);
+var content = __webpack_require__(6);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -286,7 +624,7 @@ var transform;
 var options = {"hmr":true}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(7)(content, options);
+var update = __webpack_require__(8)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -303,21 +641,21 @@ if(false) {
 }
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(6)(undefined);
+exports = module.exports = __webpack_require__(7)(undefined);
 // imports
 
 
 // module
-exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: inu1255\n * E-Mail: 929909260@qq.com\n */\n.input-style {\n  width: 100%;\n  height: 38px;\n  padding: 6px 12px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.input-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.textarea-style {\n  line-height: 1.42857143;\n  width: 100%;\n  padding: 6px 12px;\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n}\n.textarea-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.select-style {\n  width: 100%;\n  height: 33px;\n  padding: 5px 12px;\n  background-color: #fff;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.select-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.hide {\n  opacity: 0;\n  pointer-events: none;\n}\n.show {\n  opacity: 1;\n  pointer-events: auto;\n}\n.painter-menu {\n  position: absolute;\n  background: #eee;\n  border: 1px solid #ccc;\n  max-width: 50%;\n}\n.painter-menu > .painter-menu__btn {\n  float: left;\n  margin: 5px 7px;\n  padding: 2px 5px;\n  color: #fff;\n  background: #1DA57A;\n  cursor: pointer;\n}\n.painter-menu > .painter-menu__btn:hover {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn.selected {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn:active,\n.painter-menu > .painter-menu__btn.active {\n  background: #007348;\n  -webkit-box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n          box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n}\n.painter-menu > .painter-menu__btn:disabled {\n  background: #36be93;\n  opacity: .65;\n  cursor: not-allowed;\n}\n.painter-menu > .painter-menu__move {\n  margin: 5px 7px;\n  width: 24px;\n  height: 24px;\n  float: right;\n  border: 1px solid #ccc;\n  cursor: move;\n}\n.painter-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n}\n.painter-canvas__item {\n  position: absolute;\n}\n", ""]);
+exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: inu1255\n * E-Mail: 929909260@qq.com\n */\n.input-style {\n  width: 100%;\n  height: 38px;\n  padding: 6px 12px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.input-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.textarea-style {\n  line-height: 1.42857143;\n  width: 100%;\n  padding: 6px 12px;\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n}\n.textarea-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.select-style {\n  width: 100%;\n  height: 33px;\n  padding: 5px 12px;\n  background-color: #fff;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.select-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.hide {\n  opacity: 0;\n  pointer-events: none;\n}\n.show {\n  opacity: 1;\n  pointer-events: auto;\n}\n.painter-menu {\n  position: absolute;\n  background: #eee;\n  border: 1px solid #ccc;\n  max-width: 50%;\n}\n.painter-menu > .painter-menu__btn {\n  float: left;\n  margin: 5px 7px;\n  padding: 2px 5px;\n  color: #fff;\n  background: #1DA57A;\n  cursor: pointer;\n}\n.painter-menu > .painter-menu__btn:hover {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn.selected {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn:active,\n.painter-menu > .painter-menu__btn.active {\n  background: #007348;\n  -webkit-box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n          box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n}\n.painter-menu > .painter-menu__btn:disabled {\n  background: #36be93;\n  opacity: .65;\n  cursor: not-allowed;\n}\n.painter-menu > .painter-menu__move {\n  margin: 5px 7px;\n  width: 24px;\n  height: 24px;\n  float: right;\n  border: 1px solid #ccc;\n  cursor: move;\n}\n.painter-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n}\n.painter-canvas > * {\n  pointer-events: visiblestroke;\n}\n.painter-canvas__item {\n  position: absolute;\n}\n", ""]);
 
 // exports
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 /*
@@ -399,7 +737,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -455,7 +793,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(8);
+var	fixUrls = __webpack_require__(9);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -771,7 +1109,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 
@@ -866,7 +1204,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -878,339 +1216,198 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _Event = __webpack_require__(1);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Event2 = _interopRequireDefault(_Event);
+var _drawer = __webpack_require__(1);
+
+var _drawer2 = _interopRequireDefault(_drawer);
 
 var _pens = __webpack_require__(0);
 
 var _pens2 = _interopRequireDefault(_pens);
 
-var _Offset = __webpack_require__(2);
-
-var _Offset2 = _interopRequireDefault(_Offset);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var defaultPen = _pens2.default.get();
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function newConfig(config) {
-    if ((typeof config === 'undefined' ? 'undefined' : _typeof(config)) != "object") config = {};
-    return {
-        background: config.background,
-        history: config.history || [],
-        redo: config.redo || [],
-        penClass: config.penClass || defaultPen,
-        initStyle: config.initStyle || {
-            fillStyle: "red",
-            strokeStyle: "red"
-        }
-    };
-}
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var styles = ["fillStyle", "filter", "font", "globalAlpha", "globalCompositeOperation", "imageSmoothingEnabled", "imageSmoothingQuality", "lineCap", "lineDashOffset", "lineJoin", "lineWidth", "miterLimit", "shadowBlur", "shadowColor", "shadowOffsetX", "shadowOffsetY", "strokeStyle", "textAlign", "textBaseline"];
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-CanvasRenderingContext2D.prototype.getStyle = function () {
-    var _this = this;
+var DrawerSvg = function (_Drawer) {
+    _inherits(DrawerSvg, _Drawer);
 
-    var style = {};
-    styles.forEach(function (k) {
-        if (_this[k] != _this.initStyle[k]) style[k] = _this[k];
-    });
-    return style;
-};
-CanvasRenderingContext2D.prototype.setStyle = function (style) {
-    var _this2 = this;
+    function DrawerSvg() {
+        _classCallCheck(this, DrawerSvg);
 
-    if ((typeof style === 'undefined' ? 'undefined' : _typeof(style)) != "object") return this;
-    styles.forEach(function (k) {
-        if (style[k] != null) _this2[k] = style[k];else if (_this2.initStyle[k]) _this2[k] = _this2.initStyle[k];
-    });
-    return this;
-};
-
-function paintItem(ctx, item, r) {
-    if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) != "object") return;
-    var pen = _pens2.default.get(item.key);
-    if (pen) {
-        ctx.save();
-        pen.render(ctx.setStyle(item.style), warpData(item.data, r));
-        ctx.restore();
-    }
-}
-
-function normalizeEvent(e, r) {
-    if (e instanceof TouchEvent) {
-        var off = (0, _Offset2.default)(e.target);
-        var offsetX = Math.floor((e.touches[0].pageX - off.top) / r.width * 10000);
-        var offsetY = Math.floor((e.touches[0].pageY - off.left) / r.height * 10000);
-        return { offsetX: offsetX, offsetY: offsetY };
-    } else {
-        var offsetX = Math.floor(e.offsetX / r.width * 10000);
-        var offsetY = Math.floor(e.offsetY / r.height * 10000);
-        return { offsetX: offsetX, offsetY: offsetY };
-    }
-}
-
-function warpData(data, r, i) {
-    if (data instanceof Array) {
-        var list = [];
-        for (var i = 0; i < data.length; i++) {
-            var item = data[i];
-            list.push(warpData(item, r, i));
-        }
-        return list;
-    }
-    if (typeof data === "number") {
-        return (i & 1 ? r.height : r.width) * data / 10000;
-    }
-    return data;
-}
-
-function drawer(dom, config) {
-    var _this3 = this;
-
-    _Event2.default.call(this);
-    var canvas = document.createElement('canvas');
-    canvas.className = "painter-canvas";
-    var parent = dom;
-    if (dom instanceof HTMLImageElement) {
-        parent = document.createElement("div");
-        Object.assign(parent.style, dom.style);
-        dom.parentElement.insertBefore(parent, dom);
-        dom.parentElement.removeChild(dom);
-        parent.appendChild(dom);
-    }
-    var ctx = canvas.getContext("2d");
-    // 读取配置
-    config = newConfig(config);
-    ctx.initStyle = {};
-    ctx.setStyle(config.initStyle);
-    ctx.initStyle = ctx.getStyle();
-    // 画笔实例
-    var pen;
-    // 鼠标按下位置
-    var beginPoint = false;
-    // 鼠标out位置
-    var outPoint = false;
-
-    function getPen() {
-        return pen;
+        return _possibleConstructorReturn(this, (DrawerSvg.__proto__ || Object.getPrototypeOf(DrawerSvg)).apply(this, arguments));
     }
 
-    var mousedown = function mousedown(event) {
-        var e = normalizeEvent(event, canvas);
-        var ppap = getPen();
-        if (!beginPoint) beginPoint = { x: e.offsetX, y: e.offsetY };
-        if (typeof ppap.begin == "function") {
-            ppap.begin(beginPoint.x, beginPoint.y);
+    _createClass(DrawerSvg, [{
+        key: 'createCanvas',
+        value: function createCanvas() {
+            var div = document.createElement('div');
+            div.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="painter-canvas"></svg>';
+            var canvas = div.children[0];
+            this.svg = canvas.cloneNode();
+            return canvas;
         }
-        event.preventDefault();
-    };
-
-    var mousemove = function mousemove(event) {
-        var e = normalizeEvent(event, canvas);
-        var ppap = getPen();
-        // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
-        if (!beginPoint && event.buttons == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
-        if (!beginPoint) return;
-        if (typeof ppap.move == "function") {
-            ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
+    }, {
+        key: 'init',
+        value: function init() {
+            this.penStyle = {
+                fill: "rgba(0,0,0,0)",
+                stroke: "red",
+                "stroke-width": 5
+            };
         }
-        event.preventDefault();
-    };
-
-    var end = function end(endPoint, callBy) {
-        if (!beginPoint) return;
-        var ppap = getPen();
-        if (typeof ppap.end == "function") {
-            ppap.end(beginPoint.x, beginPoint.y, endPoint.x, endPoint.y, callBy);
-        }
-        beginPoint = false;
-    };
-
-    function mouseup(event) {
-        var e = normalizeEvent(event, canvas);
-        end({ x: e.offsetX, y: e.offsetY });
-        event.preventDefault();
-    }
-
-    function mouseover(event) {
-        if (config.penClass.outEnd) {
-            // 在out时已经end了
-        } else if (event.buttons != 1) {
-            end(outPoint, "mouseover");
-        }
-        outPoint = false;
-    }
-
-    function mouseout(event) {
-        var e = normalizeEvent(event, canvas);
-        outPoint = { x: e.offsetX, y: e.offsetY };
-        if (config.penClass.outEnd) {
-            end(outPoint, "mouseout");
-        } else if (event.buttons == 1) {
-            mousemove(e);
-        }
-    }
-    canvas.addEventListener("mousedown", mousedown);
-    canvas.addEventListener("mousemove", mousemove);
-    canvas.addEventListener("mouseup", mouseup);
-    canvas.addEventListener("touchstart", mousedown);
-    canvas.addEventListener("touchmove", mousemove);
-    canvas.addEventListener("touchend", mouseup);
-    canvas.addEventListener("mouseover", mouseover);
-    canvas.addEventListener("mouseout", mouseout);
-
-    var append = function append(div, x, y) {
-        if (div) {
-            div.className = "painter-canvas__item";
-            if (x != null) div.style.left = warpData(x, canvas) + "px";
-            if (y != null) div.style.top = warpData(y, canvas, 1) + "px";
-            parent.appendChild(div);
-        }
-        return parent;
-    };
-    var createNewPen = function createNewPen() {
-        // 设置画笔鼠标指针样式
-        canvas.style.cursor = config.penClass.cursor || 'auto';
-        pen = new config.penClass(_this3.setData, penSuccess, append);
-    };
-    // 画笔绘制结束回调
-    var penSuccess = function penSuccess(data) {
-        createNewPen();
-        if (typeof data != "undefined") {
-            config.history.push({ key: _pens2.default.key(config.penClass), data: data, style: ctx.getStyle() });
-            config.penData = undefined;
-            config.redo.length = 0;
-            _this3.update();
-        }
-    };
-
-    this.setPen = function (penClass) {
-        // 模拟mouseup
-        end(outPoint, "setPen");
-        // 设置为默认画笔
-        if (typeof penClass == "undefined") penClass = defaultPen;
-        var tmp = _pens2.default.get(penClass);
-        if (tmp) {
-            // 清除没有完成的画笔数据
-            if (config.penClass != tmp) {
-                config.penClass = tmp;
-                config.penData = undefined;
+    }, {
+        key: 'getStyle',
+        value: function getStyle() {
+            var s = "";
+            for (var k in this.penStyle) {
+                var v = this.penStyle[k];
+                s += k + ":" + v + ";";
             }
-            // 创建画笔
-            createNewPen();
-        } else {
-            console.log("不能识别的画笔");
-            console.log(penClass);
+            return s;
         }
-    };
-    this.update = function () {
-        this.resize();
-        // 清除画布
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.dispatchEvent('beforeupdate', ctx);
-        // 画背景
-        if (config.background) ctx.drawImage(config.background, 0, 0, canvas.width, canvas.height);
-        // 画历史数据
-        config.history.forEach(function (item) {
-            paintItem(ctx, item, canvas);
-        });
-        // 画当前画笔数据
-        if (typeof config.penData != "undefined") {
-            ctx.save();
-            config.penClass.render(ctx, warpData(config.penData, canvas));
-            ctx.restore();
+    }, {
+        key: 'setColor',
+        value: function setColor(color) {
+            return this.penStyle.stroke = color;
         }
-        this.dispatchEvent('update', ctx);
-    };
-    this.setData = function (data) {
-        if (typeof data == "undefined") return;
-        config.penData = data;
-        _this3.update();
-    };
-    this.stringify = function () {
-        return JSON.stringify(config.history);
-    };
-    this.parse = function (data) {
-        if (typeof data === "string") {
-            config.history = JSON.parse(data);
-        } else if (data instanceof Array) {
-            config.history = data;
-        } else {
-            return;
-        }
-        this.update();
-    };
-    this.undo = function (test) {
-        if (config.history.length > 0) {
-            if (test) return true;
-            config.redo.push(config.history.pop());
-            this.update();
-        }
-    };
-    this.redo = function (test) {
-        if (config.redo.length > 0) {
-            if (test) return true;
-            config.history.push(config.redo.pop());
-            this.update();
-        }
-    };
-    this.setColor = function (color) {
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-    };
-    this.getCanvas = function () {
-        return canvas;
-    };
-    this.resize = function () {
-        var modify = false;
-        if (dom.offsetWidth != canvas.width) {
-            modify = true;
-            canvas.width = dom.offsetWidth;
-        }
-        if (dom.offsetHeight != canvas.height) {
-            modify = true;
-            canvas.height = dom.offsetHeight;
-        }
-        if (modify) {
-            ctx.setStyle({});
-        }
-    };
-    this.toDataURL = function () {
-        return canvas.toDataURL();
-    };
-    this.getCtx = function () {
-        return ctx;
-    };
-    this.offset = function () {
-        return (0, _Offset2.default)(canvas);
-    };
-    this.disable = function () {
-        canvas.style.pointerEvents = "none";
-    };
-    this.enable = function () {
-        canvas.style.pointerEvents = "auto";
-    };
-    this.scale = function (n) {
-        dom.style.transformOrigin = "50% 0 0";
-        dom.style.transform = 'scale(' + n + ')'; // translate(${})`;
-        this.update();
-    };
-    createNewPen();
+    }, {
+        key: 'setStyle',
+        value: function setStyle(s) {
+            if ((typeof s === 'undefined' ? 'undefined' : _typeof(s)) === "object") {
+                Object.assign(this.penStyle, s);
+            } else if (typeof s === "string") {
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
 
-    parent.appendChild(canvas);
-    if (getComputedStyle(parent).position === "static") {
-        parent.style.position = "relative";
-    }
-    this.resize();
-}
+                try {
+                    for (var _iterator = s.split(";")[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var item = _step.value;
 
-exports.default = drawer;
+                        var ss = item.split(":");
+                        if (ss.length > 1) {
+                            this.penStyle[ss[0].trim()] = ss[1].trim();
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'append',
+        value: function append(canvas, html) {
+            if (!html) return;
+            try {
+                this.svg.innerHTML = html;
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+            var svg = this.svg.children[0];
+            // this.svg.removeChild(svg)
+            if (this.currentDom) {
+                canvas.insertBefore(svg, this.currentDom);
+            } else {
+                canvas.appendChild(svg);
+            }
+            return svg;
+        }
+    }, {
+        key: 'update',
+        value: function update(force) {
+            this.resize();
+            var canvas = this.canvas,
+                config = this.config;
+            // 清除画布
+
+            this.dispatchEvent('beforeupdate');
+            if (force) {
+                canvas.innerHTML = "";
+                this.currentDom = false;
+            }
+            // 画当前画笔数据
+            if (typeof config.penData != "undefined") {
+                var html = config.penClass.renderSvg(this.warpData(config.penData), this);
+                if (this.currentDom) {
+                    canvas.removeChild(this.currentDom);
+                    this.currentDom = false;
+                }
+                this.currentDom = this.append(canvas, html);
+            }
+            var i = canvas.children.length;
+            if (this.currentDom) {
+                i--;
+            }
+            // 画历史数据
+            for (; i < config.history.length; i++) {
+                var item = config.history[i];
+                this.append(canvas, this.paintItem(item, i));
+            }
+            this.dispatchEvent('update');
+        }
+    }, {
+        key: 'resize',
+        value: function resize() {
+            var modify = false;
+            var canvas = this.canvas,
+                config = this.config,
+                dom = this.dom;
+
+            if (dom.offsetWidth != canvas.width) {
+                modify = true;
+                config.width = dom.scrollWidth || dom.offsetWidth;
+                canvas.style.width = config.width + "px";
+            }
+            if (dom.offsetHeight != canvas.height) {
+                modify = true;
+                config.height = dom.scrollHeight || dom.offsetHeight;
+                canvas.style.height = config.height + "px";
+            }
+            return modify;
+        }
+        // add function
+
+    }, {
+        key: 'paintItem',
+        value: function paintItem(item, i) {
+            if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) != "object") return;
+            var pen = _pens2.default.get(item.key);
+            var s = "";
+            if (pen && pen.renderSvg) {
+                var style = this.getStyle();
+                this.setStyle(item.style);
+                s = pen.renderSvg(this.warpData(item.data), this);
+                this.setStyle(style);
+            }
+            return s;
+        }
+    }]);
+
+    return DrawerSvg;
+}(_drawer2.default);
+
+exports.default = DrawerSvg;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1219,12 +1416,7 @@ exports.default = drawer;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _defaultPen = __webpack_require__(11);
-
-var _defaultPen2 = _interopRequireDefault(_defaultPen);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// import pencil from './defaultPen.png';
 
 /**
  * 画笔构造函数
@@ -1252,9 +1444,10 @@ function defaultPen(render, resolve) {
 defaultPen.moveBegin = true;
 // 鼠标out时触发this.end
 defaultPen.outEnd = true;
-defaultPen.cursor = 'url(' + _defaultPen2.default + '),pointer';
-defaultPen.render = function (ctx, data) {
+// defaultPen.cursor = 'url(' + pencil + '),pointer';
+defaultPen.render = function (data, drawer) {
     if (data instanceof Array && data.length > 0) {
+        var ctx = drawer.ctx;
         ctx.beginPath();
         ctx.moveTo(data[0], data[1]);
         for (var i = 2; i < data.length; i += 2) {
@@ -1263,14 +1456,21 @@ defaultPen.render = function (ctx, data) {
         ctx.stroke();
     }
 };
+defaultPen.renderSvg = function (data, drawer) {
+    if (data instanceof Array && data.length > 0) {
+        var path = "";
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            if (i % 2 == 0) {
+                path += i == 0 ? "M" : "L";
+            }
+            path += item + " ";
+        }
+        return "<path d=\"" + path + "\" style=\"" + drawer.getStyle() + "\"/>";
+    }
+};
 
 exports.default = defaultPen;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA4RpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTMyIDc5LjE1OTI4NCwgMjAxNi8wNC8xOS0xMzoxMzo0MCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDozRjE4NkRCRkVCN0JFMDExODBERUJDM0QxRjY2MzNCMSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCMjMwQTJEMUEwMDMxMUU2QkE1MkQ5NEE3QjkyQzAyRiIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCMjMwQTJEMEEwMDMxMUU2QkE1MkQ5NEE3QjkyQzAyRiIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxNS41IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6YmRiMjkxMjItNDY1My00YjAyLWEzNmUtN2U4YjUwODFkZmFjIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6NWY1YzI3YjEtZTg2ZC0xMTc5LTkyZGUtZjI2ZDAxNGI3YWE5Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+u8AqPQAAASZQTFRFAAAABwcHCAgI1NTU1dXVwMDA1tbWT09PUVFRwsLC0tLS29vb8PDw9/f3SUlJsbGxwcHBVVVVVFRUPT096+vrFxcX7u7ura2t4uLiiYmJfHx8nJycHBwclpaW7Ozs5ubmKSkpWFhYZmZm5eXl+/v77e3tmJiYTExMnp6em5ub3NzczMzMLi4uJiYmS0tLqKio4ODgDw8PCwsLCgoKICAgpKSktra2Tk5OFhYWCQkJmZmZODg4EhISg4ODQkJCGBgYDg4OEBAQ09PT6urqISEh3d3dOzs7tbW1GhoaV1dXxMTEo6Ojvb29kJCQBQUFNjY20dHRPDw8X19faGhoeXl5w8PD+fn5DQ0NUFBQ0NDQW1tb+vr6c3NzRUVFHx8fbm5u2tra////AP/wNQAAAGJ0Uk5T/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wAQVpKqAAABNUlEQVR42oTS5XLDMBAE4LXjuG0aZigzM1PKzMztvv9L1HbSSJacdn/YJ+m7G3nG4D8BR+4qL3+CKQA9r4XHpqATtcSPmgDLOez4Tqac1/tBEOA+FgadaqCwDqRmAkAv9uqLG2A+pIME6pvt7lUMWwPEsFudXVW9yxqWBjLuYxq/MW0VhLFETjYAjJACiAleHwsA01LAFzLwRZrhgS6oETM8wLgmjPPxNwn0m9CzWhSAIUM77zNRFIC2OuOB0Y2dbgHUGWFnK4KSBGjLos3dOcGoDOQZbj+fgc+8DGgZcn+rW5V9gLum6G/xyi0/oDXr6wcOFcBTbCdFP5BWQQT3Uj8wpILsUy4q+nEZUwHHMJdINz53kRqo/bn1lBkAmC1d5LzjlQoDgZP85vLH7VqMTYGcHwEGAC8r8nWFIZTXAAAAAElFTkSuQmCC"
 
 /***/ }),
 /* 12 */
@@ -1291,13 +1491,20 @@ function linePen(render, resolve) {
     };
 }
 linePen.moveBegin = true;
-linePen.render = function (ctx, data) {
+linePen.render = function (data, drawer) {
     if (data && data.length === 4) {
+        var ctx = drawer.ctx;
         ctx.beginPath();
         ctx.moveTo(data[0], data[1]);
         ctx.lineTo(data[2], data[3]);
         ctx.stroke();
     }
+};
+linePen.renderSvg = function (data, drawer) {
+    if (data && data.length === 4) {
+        return "<line x1=\"" + data[0] + "\" y1=\"" + data[1] + "\" x2=\"" + data[2] + "\" y2=\"" + data[3] + "\" style=\"" + drawer.getStyle() + "\"/>";
+    }
+    return "";
 };
 
 exports.default = linePen;
@@ -1321,8 +1528,9 @@ function ellipsePen(render, resolve) {
     };
 }
 ellipsePen.moveBegin = true;
-ellipsePen.render = function (ctx, data) {
+ellipsePen.render = function (data, drawer) {
     if (data && data.length === 4) {
+        var ctx = drawer.ctx;
         var x = (data[0] + data[2]) / 2;
         var y = (data[1] + data[3]) / 2;
         var a = (data[2] - data[0]) / 2;
@@ -1338,6 +1546,17 @@ ellipsePen.render = function (ctx, data) {
         ctx.stroke();
     }
 };
+ellipsePen.renderSvg = function (data, drawer) {
+    if (data && data.length === 4) {
+        var x = (data[0] + data[2]) / 2;
+        var y = (data[1] + data[3]) / 2;
+        var a = Math.abs((data[2] - data[0]) / 2);
+        var b = Math.abs((data[3] - data[1]) / 2);
+
+        return "<ellipse cx=\"" + x + "\" cy=\"" + y + "\" rx=\"" + a + "\" ry=\"" + b + "\" style=\"" + drawer.getStyle() + "\"/>";
+    }
+    return "";
+};
 
 exports.default = ellipsePen;
 
@@ -1351,7 +1570,7 @@ exports.default = ellipsePen;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-function ellipsePen(render, resolve) {
+function rectPen(render, resolve) {
     this.move = function (bx, by, ex, ey) {
         render([bx, by, ex, ey]);
     };
@@ -1359,9 +1578,10 @@ function ellipsePen(render, resolve) {
         resolve([bx, by, ex, ey]);
     };
 }
-ellipsePen.moveBegin = true;
-ellipsePen.render = function (ctx, data) {
+rectPen.moveBegin = true;
+rectPen.render = function (data, drawer) {
     if (data && data.length === 4) {
+        var ctx = drawer.ctx;
         ctx.beginPath();
         ctx.moveTo(data[0], data[1]);
         ctx.lineTo(data[2], data[1]);
@@ -1371,8 +1591,18 @@ ellipsePen.render = function (ctx, data) {
         ctx.stroke();
     }
 };
+rectPen.renderSvg = function (data, drawer) {
+    if (data && data.length === 4) {
+        var x = Math.min(data[0], data[2]);
+        var y = Math.min(data[1], data[3]);
+        var width = Math.abs(data[2] - data[0]);
+        var height = Math.abs(data[3] - data[1]);
 
-exports.default = ellipsePen;
+        return "<rect x=\"" + x + "\" y=\"" + y + "\" width=\"" + width + "\" height=\"" + height + "\" style=\"" + drawer.getStyle() + "\"/>";
+    }
+};
+
+exports.default = rectPen;
 
 /***/ }),
 /* 15 */
@@ -1411,8 +1641,9 @@ function textPen(render, resolve, append) {
     };
 }
 textPen.font = "16px serif";
-textPen.render = function (ctx, data) {
+textPen.render = function (data, drawer) {
     if (data && data.length >= 4) {
+        var ctx = drawer.ctx;
         ctx.beginPath();
         var bx = data[0],
             by = data[1],
@@ -1463,26 +1694,60 @@ var _eraser2 = _interopRequireDefault(_eraser);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function eraser(render, resolve) {
-    var li = [];
-    this.begin = function (bx, by, ex, ey) {
-        li.push(bx);
-        li.push(by);
-    };
-    this.move = function (bx, by, ex, ey) {
-        li.push(ex);
-        li.push(ey);
-        render(li);
-    };
-    this.end = function (bx, by, ex, ey) {
-        li.push(ex);
-        li.push(ey);
-        resolve(li);
-    };
+function count(dom, n) {
+    n = n || 0;
+    if (dom.previousElementSibling) {
+        return count(dom.previousElementSibling, n + 1);
+    }
+    return n + "";
+}
+
+function eraser(render, resolve, append, drawer) {
+    if (drawer.canvas.tagName == "svg") {
+        var _li = [];
+        var hover = function hover(event) {
+            if (event.target != drawer.canvas && event.buttons == 1) {
+                _li.push(count(event.target));
+                render(_li);
+            }
+        };
+        var click = function click(event) {
+            if (event.target != drawer.canvas) {
+                _li.push(count(event.target));
+                render(_li);
+            }
+        };
+        drawer.canvas.addEventListener("mousemove", hover);
+        drawer.canvas.addEventListener("click", click);
+        this.end = function (bx, by, ex, ey, what) {
+            resolve(_li.length > 0 ? _li : undefined);
+        };
+        this.unmount = function () {
+            drawer.canvas.removeEventListener("mousemove", hover);
+            drawer.canvas.removeEventListener("click", click);
+        };
+    } else {
+        var li = [];
+        this.begin = function (bx, by, ex, ey) {
+            li.push(bx);
+            li.push(by);
+        };
+        this.move = function (bx, by, ex, ey) {
+            li.push(ex);
+            li.push(ey);
+            render(li);
+        };
+        this.end = function (bx, by, ex, ey) {
+            li.push(ex);
+            li.push(ey);
+            resolve(li);
+        };
+    }
 }
 eraser.cursor = 'url(' + _eraser2.default + '),pointer';
-eraser.render = function (ctx, data) {
+eraser.render = function (data, drawer) {
     if (data instanceof Array && data.length > 0) {
+        var ctx = drawer.ctx;
         for (var i = 0; i < data.length; i += 2) {
             ctx.save();
             ctx.beginPath();
@@ -1490,6 +1755,35 @@ eraser.render = function (ctx, data) {
             ctx.clip();
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.restore();
+        }
+    }
+};
+eraser.renderSvg = function (data, drawer) {
+    if (data instanceof Array && data.length > 0) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var i = _step.value;
+
+                var svg = drawer.canvas.children[i];
+                if (svg) svg.style.display = "none";
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
         }
     }
 };
@@ -1513,11 +1807,182 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _drawer = __webpack_require__(1);
+
+var _drawer2 = _interopRequireDefault(_drawer);
+
 var _pens = __webpack_require__(0);
 
 var _pens2 = _interopRequireDefault(_pens);
 
-var _Drag = __webpack_require__(19);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var styles = ["fillStyle", "filter", "font", "globalAlpha", "globalCompositeOperation", "imageSmoothingEnabled", "imageSmoothingQuality", "lineCap", "lineDashOffset", "lineJoin", "lineWidth", "miterLimit", "shadowBlur", "shadowColor", "shadowOffsetX", "shadowOffsetY", "strokeStyle", "textAlign", "textBaseline"];
+
+CanvasRenderingContext2D.prototype.getStyle = function () {
+    var _this = this;
+
+    var style = {};
+    styles.forEach(function (k) {
+        if (_this[k] != _this.initStyle[k]) style[k] = _this[k];
+    });
+    return style;
+};
+CanvasRenderingContext2D.prototype.setStyle = function (style) {
+    var _this2 = this;
+
+    if ((typeof style === 'undefined' ? 'undefined' : _typeof(style)) != "object") return this;
+    styles.forEach(function (k) {
+        if (style[k] != null) _this2[k] = style[k];else if (_this2.initStyle[k]) _this2[k] = _this2.initStyle[k];
+    });
+    return this;
+};
+
+var DrawerCanvas = function (_Drawer) {
+    _inherits(DrawerCanvas, _Drawer);
+
+    function DrawerCanvas() {
+        _classCallCheck(this, DrawerCanvas);
+
+        return _possibleConstructorReturn(this, (DrawerCanvas.__proto__ || Object.getPrototypeOf(DrawerCanvas)).apply(this, arguments));
+    }
+
+    _createClass(DrawerCanvas, [{
+        key: 'defaultConfig',
+        value: function defaultConfig() {
+            return Object.assign({
+                background: "",
+                initStyle: {
+                    fillStyle: "red",
+                    strokeStyle: "red"
+                }
+            }, _get(DrawerCanvas.prototype.__proto__ || Object.getPrototypeOf(DrawerCanvas.prototype), 'defaultConfig', this).call(this));
+        }
+    }, {
+        key: 'init',
+        value: function init() {
+            var ctx = this.ctx = this.canvas.getContext("2d");
+            // 读取配置
+            ctx.initStyle = {};
+            ctx.setStyle(this.config.initStyle);
+            ctx.initStyle = ctx.getStyle();
+        }
+    }, {
+        key: 'createCanvas',
+        value: function createCanvas() {
+            var canvas = document.createElement('canvas');
+            canvas.className = "painter-canvas";
+            return canvas;
+        }
+    }, {
+        key: 'getStyle',
+        value: function getStyle() {
+            return this.ctx.getStyle();
+        }
+    }, {
+        key: 'update',
+        value: function update() {
+            var _this4 = this;
+
+            this.resize();
+            var canvas = this.canvas,
+                ctx = this.ctx,
+                config = this.config;
+            // 清除画布
+
+            ctx.clearRect(0, 0, config.width, config.height);
+            this.dispatchEvent('beforeupdate', ctx);
+            // 画背景
+            if (config.background) ctx.drawImage(config.background, 0, 0, config.width, config.height);
+            // 画历史数据
+            config.history.forEach(function (item) {
+                _this4.paintItem(ctx, item, config);
+            });
+            // 画当前画笔数据
+            if (typeof config.penData != "undefined") {
+                ctx.save();
+                config.penClass.render(this.warpData(config.penData, canvas), this);
+                ctx.restore();
+            }
+            this.dispatchEvent('update', ctx);
+        }
+    }, {
+        key: 'resize',
+        value: function resize() {
+            if (_get(DrawerCanvas.prototype.__proto__ || Object.getPrototypeOf(DrawerCanvas.prototype), 'resize', this).call(this)) {
+                var canvas = this.canvas,
+                    config = this.config;
+
+                canvas.width = config.width;
+                canvas.height = config.height;
+                this.ctx.setStyle({});
+            }
+        }
+        // add function
+
+    }, {
+        key: 'paintItem',
+        value: function paintItem(ctx, item) {
+            if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) != "object") return;
+            var pen = _pens2.default.get(item.key);
+            if (pen) {
+                ctx.save();
+                ctx.setStyle(item.style);
+                pen.render(this.warpData(item.data), this);
+                ctx.restore();
+            }
+        }
+    }, {
+        key: 'getCtx',
+        value: function getCtx() {
+            return this.ctx;
+        }
+    }, {
+        key: 'setColor',
+        value: function setColor(color) {
+            this.ctx.fillStyle = color;
+            this.ctx.strokeStyle = color;
+        }
+    }, {
+        key: 'toDataURL',
+        value: function toDataURL() {
+            return this.canvas.toDataURL();
+        }
+    }]);
+
+    return DrawerCanvas;
+}(_drawer2.default);
+
+exports.default = DrawerCanvas;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _pens = __webpack_require__(0);
+
+var _pens2 = _interopRequireDefault(_pens);
+
+var _Drag = __webpack_require__(20);
 
 var _Drag2 = _interopRequireDefault(_Drag);
 
@@ -1661,7 +2126,7 @@ function Menu(drawer) {
 exports.default = Menu;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1671,11 +2136,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _Offset = __webpack_require__(2);
+var _Offset = __webpack_require__(3);
 
 var _Offset2 = _interopRequireDefault(_Offset);
 
-var _Event = __webpack_require__(1);
+var _Event = __webpack_require__(2);
 
 var _Event2 = _interopRequireDefault(_Event);
 

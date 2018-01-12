@@ -1,4 +1,4 @@
-import pencil from './defaultPen.png';
+// import pencil from './defaultPen.png';
 
 /**
  * 画笔构造函数
@@ -26,9 +26,10 @@ function defaultPen(render, resolve) {
 defaultPen.moveBegin = true;
 // 鼠标out时触发this.end
 defaultPen.outEnd = true;
-defaultPen.cursor = 'url(' + pencil + '),pointer';
-defaultPen.render = function(ctx, data) {
+// defaultPen.cursor = 'url(' + pencil + '),pointer';
+defaultPen.render = function(data, drawer) {
     if (data instanceof Array && data.length > 0) {
+        var ctx = drawer.ctx;
         ctx.beginPath();
         ctx.moveTo(data[0], data[1]);
         for (var i = 2; i < data.length; i += 2) {
@@ -37,5 +38,19 @@ defaultPen.render = function(ctx, data) {
         ctx.stroke();
     }
 };
+defaultPen.renderSvg = function(data, drawer) {
+    if (data instanceof Array && data.length > 0) {
+        var path = "";
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+            if (i % 2 == 0) {
+                path += i == 0 ? "M" : "L";
+            }
+            path += item + " ";
+        }
+        return `<path d="${path}" style="${drawer.getStyle()}"/>`;
+    }
+};
+
 
 export default defaultPen;

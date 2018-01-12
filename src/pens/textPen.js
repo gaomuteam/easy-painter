@@ -21,8 +21,9 @@ function textPen(render, resolve, append) {
     };
 }
 textPen.font = "16px serif";
-textPen.render = function(ctx, data) {
+textPen.render = function(data, drawer) {
     if (data && data.length >= 4) {
+        let ctx = drawer.ctx;
         ctx.beginPath();
         var bx = data[0],
             by = data[1],
