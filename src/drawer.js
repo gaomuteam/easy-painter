@@ -86,7 +86,7 @@ class Drawer {
             var e = this.normalizeEvent(event, config);
             // console.log("out", e.offsetX, e.offsetY);
             this.outPoint = { x: e.offsetX, y: e.offsetY };
-            if (event.toElement.parentElement == canvas) {
+            if (event.toElement && event.toElement.parentElement == canvas) {
                 // console.log(this.outPoint);
             } else if (config.penClass.outEnd) {
                 end(this.outPoint, "mouseout");
@@ -240,10 +240,10 @@ class Drawer {
         return offset(this.canvas);
     }
     disable() {
-        this.canvas.style.pointerEvents = "none";
+        this.canvas.classList.add("disable");
     }
     enable() {
-        this.canvas.style.pointerEvents = "auto";
+        this.canvas.classList.remove("disable");
     }
     scale(n) {
         this.canvas.parentElement.style.transformOrigin = "50% 0 0";

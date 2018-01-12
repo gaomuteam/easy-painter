@@ -278,7 +278,7 @@ var Drawer = function () {
             var e = _this.normalizeEvent(event, config);
             // console.log("out", e.offsetX, e.offsetY);
             _this.outPoint = { x: e.offsetX, y: e.offsetY };
-            if (event.toElement.parentElement == canvas) {
+            if (event.toElement && event.toElement.parentElement == canvas) {
                 // console.log(this.outPoint);
             } else if (config.penClass.outEnd) {
                 end(_this.outPoint, "mouseout");
@@ -457,12 +457,12 @@ var Drawer = function () {
     }, {
         key: 'disable',
         value: function disable() {
-            this.canvas.style.pointerEvents = "none";
+            this.canvas.classList.add("disable");
         }
     }, {
         key: 'enable',
         value: function enable() {
-            this.canvas.style.pointerEvents = "auto";
+            this.canvas.classList.remove("disable");
         }
     }, {
         key: 'scale',
@@ -587,7 +587,7 @@ var _drawerSvg = __webpack_require__(10);
 
 var _drawerSvg2 = _interopRequireDefault(_drawerSvg);
 
-var _drawerCanvas = __webpack_require__(18);
+var _drawerCanvas = __webpack_require__(17);
 
 var _drawerCanvas2 = _interopRequireDefault(_drawerCanvas);
 
@@ -595,12 +595,13 @@ var _pens = __webpack_require__(0);
 
 var _pens2 = _interopRequireDefault(_pens);
 
-var _Menu = __webpack_require__(19);
+var _Menu = __webpack_require__(18);
 
 var _Menu2 = _interopRequireDefault(_Menu);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// import Drawer from './drawer-svg';
 var Drawer = _drawerCanvas2.default;
 
 exports.Drawer = Drawer;
@@ -649,7 +650,7 @@ exports = module.exports = __webpack_require__(7)(undefined);
 
 
 // module
-exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: inu1255\n * E-Mail: 929909260@qq.com\n */\n.input-style {\n  width: 100%;\n  height: 38px;\n  padding: 6px 12px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.input-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.textarea-style {\n  line-height: 1.42857143;\n  width: 100%;\n  padding: 6px 12px;\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n}\n.textarea-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.select-style {\n  width: 100%;\n  height: 33px;\n  padding: 5px 12px;\n  background-color: #fff;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.select-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.hide {\n  opacity: 0;\n  pointer-events: none;\n}\n.show {\n  opacity: 1;\n  pointer-events: auto;\n}\n.painter-menu {\n  position: absolute;\n  background: #eee;\n  border: 1px solid #ccc;\n  max-width: 50%;\n}\n.painter-menu > .painter-menu__btn {\n  float: left;\n  margin: 5px 7px;\n  padding: 2px 5px;\n  color: #fff;\n  background: #1DA57A;\n  cursor: pointer;\n}\n.painter-menu > .painter-menu__btn:hover {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn.selected {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn:active,\n.painter-menu > .painter-menu__btn.active {\n  background: #007348;\n  -webkit-box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n          box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n}\n.painter-menu > .painter-menu__btn:disabled {\n  background: #36be93;\n  opacity: .65;\n  cursor: not-allowed;\n}\n.painter-menu > .painter-menu__move {\n  margin: 5px 7px;\n  width: 24px;\n  height: 24px;\n  float: right;\n  border: 1px solid #ccc;\n  cursor: move;\n}\n.painter-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n}\n.painter-canvas > * {\n  pointer-events: visiblestroke;\n}\n.painter-canvas__item {\n  position: absolute;\n}\n", ""]);
+exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: inu1255\n * E-Mail: 929909260@qq.com\n */\n.input-style {\n  width: 100%;\n  height: 38px;\n  padding: 6px 12px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.input-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.textarea-style {\n  line-height: 1.42857143;\n  width: 100%;\n  padding: 6px 12px;\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n}\n.textarea-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.select-style {\n  width: 100%;\n  height: 33px;\n  padding: 5px 12px;\n  background-color: #fff;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.select-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.hide {\n  opacity: 0;\n  pointer-events: none;\n}\n.show {\n  opacity: 1;\n  pointer-events: auto;\n}\n.painter-menu {\n  position: absolute;\n  background: #eee;\n  border: 1px solid #ccc;\n  max-width: 50%;\n}\n.painter-menu > .painter-menu__btn {\n  float: left;\n  margin: 5px 7px;\n  padding: 2px 5px;\n  color: #fff;\n  background: #1DA57A;\n  cursor: pointer;\n}\n.painter-menu > .painter-menu__btn:hover {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn.selected {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn:active,\n.painter-menu > .painter-menu__btn.active {\n  background: #007348;\n  -webkit-box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n          box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n}\n.painter-menu > .painter-menu__btn:disabled {\n  background: #36be93;\n  opacity: .65;\n  cursor: not-allowed;\n}\n.painter-menu > .painter-menu__move {\n  margin: 5px 7px;\n  width: 24px;\n  height: 24px;\n  float: right;\n  border: 1px solid #ccc;\n  cursor: move;\n}\n.painter-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n}\n.painter-canvas > * {\n  pointer-events: visiblestroke;\n}\n.painter-canvas.disable {\n  pointer-events: none;\n}\n.painter-canvas.disable > * {\n  pointer-events: none;\n}\n.painter-canvas__item {\n  position: absolute;\n}\n", ""]);
 
 // exports
 
@@ -1351,6 +1352,9 @@ var DrawerSvg = function (_Drawer) {
                     this.currentDom = false;
                 }
                 this.currentDom = this.append(canvas, html);
+            } else if (this.currentDom) {
+                canvas.removeChild(this.currentDom);
+                this.currentDom = false;
             }
             var i = canvas.children.length;
             if (this.currentDom) {
@@ -1398,6 +1402,21 @@ var DrawerSvg = function (_Drawer) {
                 this.setStyle(style);
             }
             return s;
+        }
+    }, {
+        key: 'toSvg',
+        value: function toSvg() {
+            var svg = this.canvas.cloneNode();
+            svg.innerHTML = this.canvas.innerHTML;
+            for (var i = svg.children.length - 1; i >= 0; i--) {
+                var item = svg.children[i];
+                if (item.style.display === "none") {
+                    svg.removeChild(item);
+                }
+            }
+            svg.removeAttribute("class");
+            svg.removeAttribute("style");
+            return svg.outerHTML;
         }
     }]);
 
@@ -1687,12 +1706,7 @@ exports.default = textPen;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _eraser = __webpack_require__(17);
-
-var _eraser2 = _interopRequireDefault(_eraser);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// import url from './eraser.png';
 
 function count(dom, n) {
     n = n || 0;
@@ -1744,7 +1758,7 @@ function eraser(render, resolve, append, drawer) {
         };
     }
 }
-eraser.cursor = 'url(' + _eraser2.default + '),pointer';
+// eraser.cursor = 'url(' + url + '),pointer';
 eraser.render = function (data, drawer) {
     if (data instanceof Array && data.length > 0) {
         var ctx = drawer.ctx;
@@ -1792,12 +1806,6 @@ exports.default = eraser;
 
 /***/ }),
 /* 17 */
-/***/ (function(module, exports) {
-
-module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAI3LAACNywG5aPW3AAABWWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgpMwidZAAADo0lEQVRYCcXWeahOaRzA8cslyxjZjbFdWS6Ff2zDxdiyk2wpW8wtS/lDylrzn5rRFIXsQvYl/lBkichSlJJkJ0s0lrKbhjHf79v76Nz33td7Ltf1q8895znnOc/yO8953puV9Z0jO2b/NalXH6/xIeYzJVatGy2dxX2sgoMptehBT9exB/m4ia0olUH0pKMb2IFaMLzmILYjXOO05KM3TdrRNqTOtgfXHNhO1EaJRx9avIUtSO08dNadE1/NbtQJF0vi2JdGbmMzamRo0MV5Da6PuhnqxrrdmVqmfROqx3oiKyuPelexF189iNk0cgX1UJzoQmWf24efivOgdctGHijD+Qu8ilyLc3qaSpPQDCtRrAmkDsCdMXqNYqw4Q60lGIrV+BmxItqZGdCXRBsemoHLaIo1qI+MER1AqPxfOIl5bE49U+8iNBOT0QBrk0cO8cJF+AT941VP1GrI3+NwT2gH9w1nPhEXcRDWSRvRDDhzG1gB94NM4YyXoxX8sbqEp3AjawEH4Sa1Do2QMcJn6MbiZvS5TLhP+HvwGL3wI3KQhx9guSV8HRdwGI1RKKIZcAE+x0wcwyoMQGpU4cIi+HtxBOfwEm0wAm+T5Z4cHej45HE9xxykjTncsTFnUBU+cBeDEKIiJ4vhXjEaFZCDIagEy23h4DxXZ/yG83BiTfApohkIF7M5cUMyE4fgmhiM8piPcdiPo/gHLjpn6xqynItfkueWO+EDfM7JrUGR+0TIgO8vhJlYjTvYCF/RDJSDC2sibNSJOPNRcKCWf0U/OCHrm8kpMKv5SERRGQj3PJqJWTiACbiH3XgPB+oXYBvO3v8NXP3O1nID5MCy9d0vusDBOJFCUVQGQiU785NzANNhFqrBaI1pqGCBcOZjUcYCMRxmwuMDLINZS4SjiROucgfozNzzXVCbYZhyX1UIF2oVfExecHGORDf4sz0Xr5GIuAOwsivfh214GKYmz52R33pXtMdSmHZnXBnvYFb2YB4+dc554n14NEyZCyakzmup4cM2YiYWwg3GDg1XvJkKz1t3DPKwC35Bb1Ag7DBELU58+CCcQbr4lxsn4Oy6oybsxBmew2AMhAsvHzuwAIU651qBcDBhIRW4kabgAP6Cr2QnfPd+ER2S5Uccve8aSBvRDNjQ52ae2oiZOAkH7SrPRUfY5iS4SH/HW3zTcOZ/wnXxDH/jD3g9Y0QzkLFymgq+61N4CAexAf5euPpLPTLtrIUG9D/ZlLcA+kExxQAAAABJRU5ErkJggg=="
-
-/***/ }),
-/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1968,7 +1976,7 @@ var DrawerCanvas = function (_Drawer) {
 exports.default = DrawerCanvas;
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1982,7 +1990,7 @@ var _pens = __webpack_require__(0);
 
 var _pens2 = _interopRequireDefault(_pens);
 
-var _Drag = __webpack_require__(20);
+var _Drag = __webpack_require__(19);
 
 var _Drag2 = _interopRequireDefault(_Drag);
 
@@ -2126,7 +2134,7 @@ function Menu(drawer) {
 exports.default = Menu;
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

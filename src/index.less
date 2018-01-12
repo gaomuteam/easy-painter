@@ -28,6 +28,12 @@
     >*{
         pointer-events: visiblestroke;
     }
+    &.disable{
+        pointer-events: none;
+        >*{
+            pointer-events: none;
+        }
+    }
 }
 
 .painter-canvas__item{

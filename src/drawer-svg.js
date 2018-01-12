@@ -45,7 +45,7 @@ class DrawerSvg extends Drawer {
             this.svg.innerHTML = html;
         } catch (error) {
             console.log(error);
-            return; 
+            return;
         }
         var svg = this.svg.children[0];
         // this.svg.removeChild(svg)
@@ -73,6 +73,9 @@ class DrawerSvg extends Drawer {
                 this.currentDom = false;
             }
             this.currentDom = this.append(canvas, html);
+        } else if (this.currentDom) {
+            canvas.removeChild(this.currentDom);
+            this.currentDom = false;
         }
         var i = canvas.children.length;
         if (this.currentDom) {
@@ -112,6 +115,19 @@ class DrawerSvg extends Drawer {
             this.setStyle(style);
         }
         return s;
+    }
+    toSvg(){
+        var svg = this.canvas.cloneNode()
+        svg.innerHTML = this.canvas.innerHTML
+        for (let i = svg.children.length-1; i >= 0; i--) {
+            const item = svg.children[i];
+            if (item.style.display === "none") {
+                svg.removeChild(item)
+            }
+        }
+        svg.removeAttribute("class")
+        svg.removeAttribute("style")
+        return svg.outerHTML
     }
 }
 
