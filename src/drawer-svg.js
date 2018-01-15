@@ -5,8 +5,7 @@ class DrawerSvg extends Drawer {
     createCanvas() {
         var div = document.createElement('div');
         div.innerHTML = `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="painter-canvas"></svg>`;
-        var canvas = div.children[0];
-        this.svg = canvas.cloneNode();
+        var canvas = div.childNodes[0];
         return canvas;
     }
     init() {
@@ -31,28 +30,29 @@ class DrawerSvg extends Drawer {
         if (typeof s === "object") {
             Object.assign(this.penStyle, s);
         } else if (typeof s === "string") {
-            for (let item of s.split(";")) {
+            s.split(";").forEach((item) => {
                 let ss = item.split(":");
                 if (ss.length > 1) {
                     this.penStyle[ss[0].trim()] = ss[1].trim();
                 }
-            }
+            });
         }
     }
     append(canvas, html) {
         if (!html) return;
+        var svg;
         try {
-            this.svg.innerHTML = html;
+            svg = document.createElementNS('http://www.w3.org/2000/svg', /<(\w+)/.exec(html)[1]);
+            html.replace(/\s+(\w+)=['"]([^'"]+)['"]/g, function(x0, key, value) {
+                svg.setAttribute(key, value);
+            });
+            if (this.currentDom) {
+                canvas.insertBefore(svg, this.currentDom);
+            } else {
+                canvas.appendChild(svg);
+            }
         } catch (error) {
             console.log(error);
-            return;
-        }
-        var svg = this.svg.children[0];
-        // this.svg.removeChild(svg)
-        if (this.currentDom) {
-            canvas.insertBefore(svg, this.currentDom);
-        } else {
-            canvas.appendChild(svg);
         }
         return svg;
     }
@@ -62,7 +62,8 @@ class DrawerSvg extends Drawer {
         // 清除画布
         this.dispatchEvent('beforeupdate');
         if (force) {
-            canvas.innerHTML = "";
+            while (canvas.hasChildNodes())
+                canvas.removeChild(canvas.firstChild);
             this.currentDom = false;
         }
         // 画当前画笔数据
@@ -77,7 +78,7 @@ class DrawerSvg extends Drawer {
             canvas.removeChild(this.currentDom);
             this.currentDom = false;
         }
-        var i = canvas.children.length;
+        var i = canvas.childNodes.length;
         if (this.currentDom) {
             i--;
         }
@@ -116,18 +117,18 @@ class DrawerSvg extends Drawer {
         }
         return s;
     }
-    toSvg(){
-        var svg = this.canvas.cloneNode()
-        svg.innerHTML = this.canvas.innerHTML
-        for (let i = svg.children.length-1; i >= 0; i--) {
-            const item = svg.children[i];
+    toSvg() {
+        var svg = this.canvas.cloneNode();
+        svg.innerHTML = this.canvas.innerHTML;
+        for (let i = svg.childNodes.length - 1; i >= 0; i--) {
+            const item = svg.childNodes[i];
             if (item.style.display === "none") {
-                svg.removeChild(item)
+                svg.removeChild(item);
             }
         }
-        svg.removeAttribute("class")
-        svg.removeAttribute("style")
-        return svg.outerHTML
+        svg.removeAttribute("class");
+        svg.removeAttribute("style");
+        return svg.outerHTML;
     }
 }
 

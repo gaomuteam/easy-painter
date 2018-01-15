@@ -26,8 +26,13 @@
     top: 0;
     left: 0;
     >*{
-        pointer-events: visiblestroke;
-    }
+        pointer-events: none;
+	}
+	&.eraser{
+		>*{
+			pointer-events: visiblestroke;
+		}
+	}
     &.disable{
         pointer-events: none;
         >*{

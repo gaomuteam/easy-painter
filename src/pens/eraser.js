@@ -12,7 +12,7 @@ function eraser(render, resolve, append, drawer) {
     if (drawer.canvas.tagName == "svg") {
         let li = [];
         const hover = (event) => {
-            if (event.target != drawer.canvas && event.buttons == 1) {
+            if (event.target != drawer.canvas && event.which == 1) {
                 li.push(count(event.target));
                 render(li);
             }
@@ -66,10 +66,10 @@ eraser.render = function(data, drawer) {
 };
 eraser.renderSvg = function(data, drawer) {
     if (data instanceof Array && data.length > 0) {
-        for (let i of data) {
-            var svg = drawer.canvas.children[i];
+        data.forEach(function(i) {
+            var svg = drawer.canvas.childNodes[i];
             if (svg) svg.style.display = "none";
-        }
+        });
     }
 };
 

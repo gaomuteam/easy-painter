@@ -1,4 +1,4 @@
-// import pencil from './defaultPen.png';
+// import pencil from './defaultPen.cur';
 
 /**
  * 画笔构造函数

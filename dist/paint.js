@@ -191,6 +191,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var defaultPen = _pens2.default.get();
 
+if (!Object.assign) {
+    Object.assign = function (a, b) {
+        for (var k in b) {
+            var v = b[k];
+            a[k] = v;
+        }
+        return a;
+    };
+}
+
 var Drawer = function () {
     function Drawer(dom, config) {
         var _this = this;
@@ -242,7 +252,7 @@ var Drawer = function () {
             // console.log("move", e.offsetX, e.offsetY);
             var ppap = getPen();
             // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
-            if (!beginPoint && event.buttons == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
+            if (!beginPoint && event.which == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
             if (!beginPoint) return;
             if (typeof ppap.move == "function") {
                 ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
@@ -268,7 +278,7 @@ var Drawer = function () {
         var mouseover = function mouseover(event) {
             if (config.penClass.outEnd) {
                 // 在out时已经end了
-            } else if (_this.outPoint && event.buttons != 1) {
+            } else if (_this.outPoint && event.which != 1) {
                 end(_this.outPoint, "mouseover");
             }
             _this.outPoint = false;
@@ -282,7 +292,7 @@ var Drawer = function () {
                 // console.log(this.outPoint);
             } else if (config.penClass.outEnd) {
                 end(_this.outPoint, "mouseout");
-            } else if (event.buttons == 1) {
+            } else if (event.which == 1) {
                 mousemove(e);
             }
         };
@@ -307,7 +317,7 @@ var Drawer = function () {
         var createNewPen = this.createNewPen = function () {
             // 设置画笔鼠标指针样式
             if (pen && typeof pen.unmount === "function") pen.unmount();
-            canvas.style.cursor = config.penClass.cursor || 'auto';
+            // canvas.style.cursor = config.penClass.cursor || 'auto';
             pen = new config.penClass(_this.setData, penSuccess, append, _this);
         };
         // 画笔绘制结束回调
@@ -378,6 +388,13 @@ var Drawer = function () {
             // 模拟mouseup
             this.end(this.outPoint, "setPen");
             // 设置为默认画笔
+            if (typeof penClass === "string") {
+                if (this._prevPenClass) {
+                    this.canvas.classList.remove(this._prevPenClass);
+                }
+                this._prevPenClass = penClass;
+                this.canvas.classList.add(penClass);
+            }
             if (typeof penClass == "undefined") penClass = defaultPen;
             var tmp = _pens2.default.get(penClass);
             if (tmp) {
@@ -650,7 +667,7 @@ exports = module.exports = __webpack_require__(7)(undefined);
 
 
 // module
-exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: inu1255\n * E-Mail: 929909260@qq.com\n */\n.input-style {\n  width: 100%;\n  height: 38px;\n  padding: 6px 12px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.input-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.textarea-style {\n  line-height: 1.42857143;\n  width: 100%;\n  padding: 6px 12px;\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n}\n.textarea-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.select-style {\n  width: 100%;\n  height: 33px;\n  padding: 5px 12px;\n  background-color: #fff;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.select-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.hide {\n  opacity: 0;\n  pointer-events: none;\n}\n.show {\n  opacity: 1;\n  pointer-events: auto;\n}\n.painter-menu {\n  position: absolute;\n  background: #eee;\n  border: 1px solid #ccc;\n  max-width: 50%;\n}\n.painter-menu > .painter-menu__btn {\n  float: left;\n  margin: 5px 7px;\n  padding: 2px 5px;\n  color: #fff;\n  background: #1DA57A;\n  cursor: pointer;\n}\n.painter-menu > .painter-menu__btn:hover {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn.selected {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn:active,\n.painter-menu > .painter-menu__btn.active {\n  background: #007348;\n  -webkit-box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n          box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n}\n.painter-menu > .painter-menu__btn:disabled {\n  background: #36be93;\n  opacity: .65;\n  cursor: not-allowed;\n}\n.painter-menu > .painter-menu__move {\n  margin: 5px 7px;\n  width: 24px;\n  height: 24px;\n  float: right;\n  border: 1px solid #ccc;\n  cursor: move;\n}\n.painter-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n}\n.painter-canvas > * {\n  pointer-events: visiblestroke;\n}\n.painter-canvas.disable {\n  pointer-events: none;\n}\n.painter-canvas.disable > * {\n  pointer-events: none;\n}\n.painter-canvas__item {\n  position: absolute;\n}\n", ""]);
+exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: inu1255\n * E-Mail: 929909260@qq.com\n */\n.input-style {\n  width: 100%;\n  height: 38px;\n  padding: 6px 12px;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.input-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.textarea-style {\n  line-height: 1.42857143;\n  width: 100%;\n  padding: 6px 12px;\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n}\n.textarea-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.select-style {\n  width: 100%;\n  height: 33px;\n  padding: 5px 12px;\n  background-color: #fff;\n  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);\n  border-radius: 3px;\n  -webkit-transition: all 0.5s;\n  -o-transition: all 0.5s;\n  transition: all 0.5s;\n}\n.select-style:focus {\n  border-color: #1F90E6;\n  -webkit-box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n          box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);\n}\n.hide {\n  opacity: 0;\n  pointer-events: none;\n}\n.show {\n  opacity: 1;\n  pointer-events: auto;\n}\n.painter-menu {\n  position: absolute;\n  background: #eee;\n  border: 1px solid #ccc;\n  max-width: 50%;\n}\n.painter-menu > .painter-menu__btn {\n  float: left;\n  margin: 5px 7px;\n  padding: 2px 5px;\n  color: #fff;\n  background: #1DA57A;\n  cursor: pointer;\n}\n.painter-menu > .painter-menu__btn:hover {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn.selected {\n  background: #048c61;\n}\n.painter-menu > .painter-menu__btn:active,\n.painter-menu > .painter-menu__btn.active {\n  background: #007348;\n  -webkit-box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n          box-shadow: inset 0 0 20px 0 rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.2);\n}\n.painter-menu > .painter-menu__btn:disabled {\n  background: #36be93;\n  opacity: .65;\n  cursor: not-allowed;\n}\n.painter-menu > .painter-menu__move {\n  margin: 5px 7px;\n  width: 24px;\n  height: 24px;\n  float: right;\n  border: 1px solid #ccc;\n  cursor: move;\n}\n.painter-canvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n}\n.painter-canvas > * {\n  pointer-events: none;\n}\n.painter-canvas.eraser > * {\n  pointer-events: visiblestroke;\n}\n.painter-canvas.disable {\n  pointer-events: none;\n}\n.painter-canvas.disable > * {\n  pointer-events: none;\n}\n.painter-canvas__item {\n  position: absolute;\n}\n", ""]);
 
 // exports
 
@@ -1249,8 +1266,7 @@ var DrawerSvg = function (_Drawer) {
         value: function createCanvas() {
             var div = document.createElement('div');
             div.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" class="painter-canvas"></svg>';
-            var canvas = div.children[0];
-            this.svg = canvas.cloneNode();
+            var canvas = div.childNodes[0];
             return canvas;
         }
     }, {
@@ -1280,54 +1296,36 @@ var DrawerSvg = function (_Drawer) {
     }, {
         key: 'setStyle',
         value: function setStyle(s) {
+            var _this2 = this;
+
             if ((typeof s === 'undefined' ? 'undefined' : _typeof(s)) === "object") {
                 Object.assign(this.penStyle, s);
             } else if (typeof s === "string") {
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = s.split(";")[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var item = _step.value;
-
-                        var ss = item.split(":");
-                        if (ss.length > 1) {
-                            this.penStyle[ss[0].trim()] = ss[1].trim();
-                        }
+                s.split(";").forEach(function (item) {
+                    var ss = item.split(":");
+                    if (ss.length > 1) {
+                        _this2.penStyle[ss[0].trim()] = ss[1].trim();
                     }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
+                });
             }
         }
     }, {
         key: 'append',
         value: function append(canvas, html) {
             if (!html) return;
+            var svg;
             try {
-                this.svg.innerHTML = html;
+                svg = document.createElementNS('http://www.w3.org/2000/svg', /<(\w+)/.exec(html)[1]);
+                html.replace(/\s+(\w+)=['"]([^'"]+)['"]/g, function (x0, key, value) {
+                    svg.setAttribute(key, value);
+                });
+                if (this.currentDom) {
+                    canvas.insertBefore(svg, this.currentDom);
+                } else {
+                    canvas.appendChild(svg);
+                }
             } catch (error) {
                 console.log(error);
-                return;
-            }
-            var svg = this.svg.children[0];
-            // this.svg.removeChild(svg)
-            if (this.currentDom) {
-                canvas.insertBefore(svg, this.currentDom);
-            } else {
-                canvas.appendChild(svg);
             }
             return svg;
         }
@@ -1341,8 +1339,9 @@ var DrawerSvg = function (_Drawer) {
 
             this.dispatchEvent('beforeupdate');
             if (force) {
-                canvas.innerHTML = "";
-                this.currentDom = false;
+                while (canvas.hasChildNodes()) {
+                    canvas.removeChild(canvas.firstChild);
+                }this.currentDom = false;
             }
             // 画当前画笔数据
             if (typeof config.penData != "undefined") {
@@ -1356,7 +1355,7 @@ var DrawerSvg = function (_Drawer) {
                 canvas.removeChild(this.currentDom);
                 this.currentDom = false;
             }
-            var i = canvas.children.length;
+            var i = canvas.childNodes.length;
             if (this.currentDom) {
                 i--;
             }
@@ -1408,8 +1407,8 @@ var DrawerSvg = function (_Drawer) {
         value: function toSvg() {
             var svg = this.canvas.cloneNode();
             svg.innerHTML = this.canvas.innerHTML;
-            for (var i = svg.children.length - 1; i >= 0; i--) {
-                var item = svg.children[i];
+            for (var i = svg.childNodes.length - 1; i >= 0; i--) {
+                var item = svg.childNodes[i];
                 if (item.style.display === "none") {
                     svg.removeChild(item);
                 }
@@ -1435,7 +1434,7 @@ exports.default = DrawerSvg;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-// import pencil from './defaultPen.png';
+// import pencil from './defaultPen.cur';
 
 /**
  * 画笔构造函数
@@ -1720,7 +1719,7 @@ function eraser(render, resolve, append, drawer) {
     if (drawer.canvas.tagName == "svg") {
         var _li = [];
         var hover = function hover(event) {
-            if (event.target != drawer.canvas && event.buttons == 1) {
+            if (event.target != drawer.canvas && event.which == 1) {
                 _li.push(count(event.target));
                 render(_li);
             }
@@ -1774,31 +1773,10 @@ eraser.render = function (data, drawer) {
 };
 eraser.renderSvg = function (data, drawer) {
     if (data instanceof Array && data.length > 0) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-            for (var _iterator = data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var i = _step.value;
-
-                var svg = drawer.canvas.children[i];
-                if (svg) svg.style.display = "none";
-            }
-        } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
-                }
-            }
-        }
+        data.forEach(function (i) {
+            var svg = drawer.canvas.childNodes[i];
+            if (svg) svg.style.display = "none";
+        });
     }
 };
 

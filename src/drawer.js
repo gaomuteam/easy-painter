@@ -3,6 +3,16 @@ import pens from './pens';
 import offset from './libs/Offset.js';
 var defaultPen = pens.get();
 
+if (!Object.assign) {
+    Object.assign = function(a, b) {
+        for (let k in b) {
+            let v = b[k];
+            a[k] = v;
+        }
+        return a;
+    };
+}
+
 class Drawer {
     constructor(dom, config) {
         Event.call(this);
@@ -50,7 +60,7 @@ class Drawer {
             // console.log("move", e.offsetX, e.offsetY);
             var ppap = getPen();
             // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
-            if (!beginPoint && event.buttons == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
+            if (!beginPoint && event.which == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
             if (!beginPoint) return;
             if (typeof ppap.move == "function") {
                 ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
@@ -76,7 +86,7 @@ class Drawer {
         const mouseover = (event) => {
             if (config.penClass.outEnd) {
                 // 在out时已经end了
-            } else if (this.outPoint && event.buttons != 1) {
+            } else if (this.outPoint && event.which != 1) {
                 end(this.outPoint, "mouseover");
             }
             this.outPoint = false;
@@ -90,7 +100,7 @@ class Drawer {
                 // console.log(this.outPoint);
             } else if (config.penClass.outEnd) {
                 end(this.outPoint, "mouseout");
-            } else if (event.buttons == 1) {
+            } else if (event.which == 1) {
                 mousemove(e);
             }
         };
@@ -115,8 +125,8 @@ class Drawer {
         const createNewPen = this.createNewPen = () => {
             // 设置画笔鼠标指针样式
             if (pen && typeof pen.unmount === "function") pen.unmount();
-            canvas.style.cursor = config.penClass.cursor || 'auto';
-            pen = new config.penClass(this.setData, penSuccess, append, this);
+			// canvas.style.cursor = config.penClass.cursor || 'auto';
+			pen = new config.penClass(this.setData, penSuccess, append, this);
         };
         // 画笔绘制结束回调
         const penSuccess = (data) => {
@@ -178,7 +188,14 @@ class Drawer {
     setPen(penClass) {
         // 模拟mouseup
         this.end(this.outPoint, "setPen");
-        // 设置为默认画笔
+		// 设置为默认画笔
+		if (typeof penClass==="string") {
+			if (this._prevPenClass) {
+				this.canvas.classList.remove(this._prevPenClass);
+			}
+			this._prevPenClass = penClass;
+			this.canvas.classList.add(penClass);
+		}
         if (typeof penClass == "undefined") penClass = defaultPen;
         var tmp = pens.get(penClass);
         if (tmp) {
