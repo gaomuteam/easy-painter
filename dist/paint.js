@@ -596,7 +596,7 @@ exports.default = offset;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.pens = exports.Menu = exports.DrawerCanvas = exports.DrawerSvg = exports.Drawer = undefined;
+exports.pens = exports.Drawer = undefined;
 
 __webpack_require__(5);
 
@@ -604,28 +604,28 @@ var _drawerSvg = __webpack_require__(10);
 
 var _drawerSvg2 = _interopRequireDefault(_drawerSvg);
 
-var _drawerCanvas = __webpack_require__(17);
-
-var _drawerCanvas2 = _interopRequireDefault(_drawerCanvas);
-
 var _pens = __webpack_require__(0);
 
 var _pens2 = _interopRequireDefault(_pens);
 
-var _Menu = __webpack_require__(18);
-
-var _Menu2 = _interopRequireDefault(_Menu);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import Drawer from './drawer-svg';
-var Drawer = _drawerCanvas2.default;
-
-exports.Drawer = Drawer;
-exports.DrawerSvg = _drawerSvg2.default;
-exports.DrawerCanvas = _drawerCanvas2.default;
-exports.Menu = _Menu2.default;
+exports.Drawer = _drawerSvg2.default;
 exports.pens = _pens2.default;
+// import DrawerSvg from './drawer-svg';
+// import DrawerCanvas from './drawer-canvas';
+// import pens from './pens';
+// import Menu from './Menu';
+
+// const Drawer = DrawerCanvas;
+
+// export {
+//     Drawer,
+//     DrawerSvg,
+//     DrawerCanvas,
+//     Menu,
+//     pens,
+// };
 
 /***/ }),
 /* 5 */
@@ -1272,6 +1272,7 @@ var DrawerSvg = function (_Drawer) {
     }, {
         key: 'init',
         value: function init() {
+            this.current_indx = 0;
             this.penStyle = {
                 fill: "rgba(0,0,0,0)",
                 stroke: "red",
@@ -1339,6 +1340,7 @@ var DrawerSvg = function (_Drawer) {
 
             this.dispatchEvent('beforeupdate');
             if (force) {
+                this.current_indx = 0;
                 while (canvas.hasChildNodes()) {
                     canvas.removeChild(canvas.firstChild);
                 }this.currentDom = false;
@@ -1355,14 +1357,10 @@ var DrawerSvg = function (_Drawer) {
                 canvas.removeChild(this.currentDom);
                 this.currentDom = false;
             }
-            var i = canvas.childNodes.length;
-            if (this.currentDom) {
-                i--;
-            }
             // 画历史数据
-            for (; i < config.history.length; i++) {
-                var item = config.history[i];
-                this.append(canvas, this.paintItem(item, i));
+            for (; this.current_indx < config.history.length; this.current_indx++) {
+                var item = config.history[this.current_indx];
+                this.append(canvas, this.paintItem(item, this.current_indx));
             }
             this.dispatchEvent('update');
         }
@@ -1781,453 +1779,6 @@ eraser.renderSvg = function (data, drawer) {
 };
 
 exports.default = eraser;
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _drawer = __webpack_require__(1);
-
-var _drawer2 = _interopRequireDefault(_drawer);
-
-var _pens = __webpack_require__(0);
-
-var _pens2 = _interopRequireDefault(_pens);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var styles = ["fillStyle", "filter", "font", "globalAlpha", "globalCompositeOperation", "imageSmoothingEnabled", "imageSmoothingQuality", "lineCap", "lineDashOffset", "lineJoin", "lineWidth", "miterLimit", "shadowBlur", "shadowColor", "shadowOffsetX", "shadowOffsetY", "strokeStyle", "textAlign", "textBaseline"];
-
-CanvasRenderingContext2D.prototype.getStyle = function () {
-    var _this = this;
-
-    var style = {};
-    styles.forEach(function (k) {
-        if (_this[k] != _this.initStyle[k]) style[k] = _this[k];
-    });
-    return style;
-};
-CanvasRenderingContext2D.prototype.setStyle = function (style) {
-    var _this2 = this;
-
-    if ((typeof style === 'undefined' ? 'undefined' : _typeof(style)) != "object") return this;
-    styles.forEach(function (k) {
-        if (style[k] != null) _this2[k] = style[k];else if (_this2.initStyle[k]) _this2[k] = _this2.initStyle[k];
-    });
-    return this;
-};
-
-var DrawerCanvas = function (_Drawer) {
-    _inherits(DrawerCanvas, _Drawer);
-
-    function DrawerCanvas() {
-        _classCallCheck(this, DrawerCanvas);
-
-        return _possibleConstructorReturn(this, (DrawerCanvas.__proto__ || Object.getPrototypeOf(DrawerCanvas)).apply(this, arguments));
-    }
-
-    _createClass(DrawerCanvas, [{
-        key: 'defaultConfig',
-        value: function defaultConfig() {
-            return Object.assign({
-                background: "",
-                initStyle: {
-                    fillStyle: "red",
-                    strokeStyle: "red"
-                }
-            }, _get(DrawerCanvas.prototype.__proto__ || Object.getPrototypeOf(DrawerCanvas.prototype), 'defaultConfig', this).call(this));
-        }
-    }, {
-        key: 'init',
-        value: function init() {
-            var ctx = this.ctx = this.canvas.getContext("2d");
-            // 读取配置
-            ctx.initStyle = {};
-            ctx.setStyle(this.config.initStyle);
-            ctx.initStyle = ctx.getStyle();
-        }
-    }, {
-        key: 'createCanvas',
-        value: function createCanvas() {
-            var canvas = document.createElement('canvas');
-            canvas.className = "painter-canvas";
-            return canvas;
-        }
-    }, {
-        key: 'getStyle',
-        value: function getStyle() {
-            return this.ctx.getStyle();
-        }
-    }, {
-        key: 'update',
-        value: function update() {
-            var _this4 = this;
-
-            this.resize();
-            var canvas = this.canvas,
-                ctx = this.ctx,
-                config = this.config;
-            // 清除画布
-
-            ctx.clearRect(0, 0, config.width, config.height);
-            this.dispatchEvent('beforeupdate', ctx);
-            // 画背景
-            if (config.background) ctx.drawImage(config.background, 0, 0, config.width, config.height);
-            // 画历史数据
-            config.history.forEach(function (item) {
-                _this4.paintItem(ctx, item, config);
-            });
-            // 画当前画笔数据
-            if (typeof config.penData != "undefined") {
-                ctx.save();
-                config.penClass.render(this.warpData(config.penData, canvas), this);
-                ctx.restore();
-            }
-            this.dispatchEvent('update', ctx);
-        }
-    }, {
-        key: 'resize',
-        value: function resize() {
-            if (_get(DrawerCanvas.prototype.__proto__ || Object.getPrototypeOf(DrawerCanvas.prototype), 'resize', this).call(this)) {
-                var canvas = this.canvas,
-                    config = this.config;
-
-                canvas.width = config.width;
-                canvas.height = config.height;
-                this.ctx.setStyle({});
-            }
-        }
-        // add function
-
-    }, {
-        key: 'paintItem',
-        value: function paintItem(ctx, item) {
-            if ((typeof item === 'undefined' ? 'undefined' : _typeof(item)) != "object") return;
-            var pen = _pens2.default.get(item.key);
-            if (pen) {
-                ctx.save();
-                ctx.setStyle(item.style);
-                pen.render(this.warpData(item.data), this);
-                ctx.restore();
-            }
-        }
-    }, {
-        key: 'getCtx',
-        value: function getCtx() {
-            return this.ctx;
-        }
-    }, {
-        key: 'setColor',
-        value: function setColor(color) {
-            this.ctx.fillStyle = color;
-            this.ctx.strokeStyle = color;
-        }
-    }, {
-        key: 'toDataURL',
-        value: function toDataURL() {
-            return this.canvas.toDataURL();
-        }
-    }]);
-
-    return DrawerCanvas;
-}(_drawer2.default);
-
-exports.default = DrawerCanvas;
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _pens = __webpack_require__(0);
-
-var _pens2 = _interopRequireDefault(_pens);
-
-var _Drag = __webpack_require__(19);
-
-var _Drag2 = _interopRequireDefault(_Drag);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var body = document.body || document.documentElement;
-
-function Menu(drawer) {
-    var menu = document.createElement("div");
-    menu.className = "painter-menu";
-    var offset = drawer.offset();
-    menu.style.top = offset.top + "px";
-    menu.style.left = offset.left + "px";
-    document.body.appendChild(menu);
-    this.addButton = function (html, cb) {
-        if (html && cb) {
-            var btn = document.createElement("div");
-            btn.className = "painter-menu__btn";
-            btn.innerText = html;
-            btn.addEventListener("click", cb);
-            menu.appendChild(btn);
-            return btn;
-        }
-    };
-    this.addPens = function (keys) {
-        var _this = this;
-
-        keys = keys || _pens2.default.keys();
-        keys.forEach(function (item) {
-            if (!item) return;
-            if (!item.html) {
-                item = { html: item, key: item };
-            }
-            var btn = document.createElement("div");
-            btn.className = "painter-menu__btn painter-menu__pen";
-            btn.innerHTML = item.html.replace(/pen$/i, "");
-            btn.addEventListener("click", function () {
-                btn.className += " active";
-                drawer.setPen(item.key);
-                if (_this.addPens.prev) {
-                    _this.addPens.prev.className = _this.addPens.prev.className.replace(" active", "");
-                }
-                _this.addPens.prev = btn;
-            });
-            menu.appendChild(btn);
-            if (!_this.addPens.prev) {
-                _this.addPens.prev = btn;
-                btn.className += " active";
-            }
-        });
-        return this;
-    };
-    this.moveable = function () {
-        var btn = document.createElement("div");
-        btn.className = "painter-menu__move";
-        var drag = new _Drag2.default(btn, menu).moveTo(offset).start();
-        drag.addEventListener("begin", function () {
-            drawer.disable();
-        });
-        drag.addEventListener("end", function () {
-            drawer.enable();
-        });
-        menu.appendChild(btn);
-        return this;
-    };
-    this.undo = function () {
-        this.addButton("撤销", function () {
-            drawer.undo();
-        });
-        this.addButton("重做", function () {
-            drawer.redo();
-        });
-        return this;
-    };
-    this.scale = function () {
-        var scale = 1;
-        this.addButton("放大", function () {
-            scale *= 1.1;
-            drawer.scale(scale);
-        });
-        this.addButton("缩小", function () {
-            scale /= 1.1;
-            drawer.scale(scale);
-        });
-        return this;
-    };
-    this.color = function (colors) {
-        var _this2 = this;
-
-        colors = colors || [["red", "红色"], ["yellow", "黄色"], ["blue", "蓝色"]];
-        colors.forEach(function (item) {
-            var btn = _this2.addButton(item[1], function () {
-                drawer.setColor(item[0]);
-                btn.className += " active";
-                if (_this2.color.prev) {
-                    _this2.color.prev.className = _this2.color.prev.className.replace(" active", "");
-                }
-                _this2.color.prev = btn;
-            });
-            btn.style.color = item[0];
-            if (!_this2.color.prev) {
-                _this2.color.prev = btn;
-                btn.className += " active";
-            }
-        });
-        return this;
-    };
-    this.clear = function () {
-        this.addButton("清空", function () {
-            drawer.parse([]);
-        });
-        return this;
-    };
-    this.restore = function (s) {
-        this.restore.count++;
-        this.addButton("恢复" + this.restore.count, function () {
-            drawer.parse(s);
-        });
-        return this;
-    };
-    this.restore.count = 0;
-    this.save = function () {
-        var _this3 = this;
-
-        this.addButton("保存", function () {
-            _this3.restore(drawer.stringify());
-            drawer.parse([]);
-        });
-        return this;
-    };
-    this.disable = function () {
-        document.body.removeChild(menu);
-        return this;
-    };
-    this.enable = function () {
-        document.body.appendChild(menu);
-        return this;
-    };
-}
-
-exports.default = Menu;
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _Offset = __webpack_require__(3);
-
-var _Offset2 = _interopRequireDefault(_Offset);
-
-var _Event = __webpack_require__(2);
-
-var _Event2 = _interopRequireDefault(_Event);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function Drag(lis, aim) {
-    var _this = this;
-
-    _Event2.default.call(this);
-    aim = aim || lis;
-    this.state = { end: (0, _Offset2.default)(aim) };
-    this.setBegin = function (x, y) {
-        this.state.begin = { left: x, top: y };
-    };
-    this.warpEvent = function (e) {
-        e.preventDefault();
-        if (e instanceof TouchEvent) {
-            if (e.type === "touchend") {
-                e.pageX = e.changedTouches[0].pageX;
-                e.pageY = e.changedTouches[0].pageY;
-            } else {
-                e.pageX = e.touches[0].pageX;
-                e.pageY = e.touches[0].pageY;
-            }
-        }
-        return e;
-    };
-    this.getMoved = function (x, y) {
-        var _state$begin = this.state.begin,
-            left = _state$begin.left,
-            top = _state$begin.top;
-
-        left = x - left;
-        top = y - top;
-        left += this.state.end.left || 0;
-        top += this.state.end.top || 0;
-        this.state.move = { left: left, top: top };
-        return this.state.move;
-    };
-    this.begin = function (e) {
-        if (!_this.state.begin) {
-            e = _this.warpEvent(e);
-            _this.setBegin(e.pageX, e.pageY);
-            _this.dispatchEvent("begin");
-        }
-    };
-    this.move = function (e) {
-        if (_this.state.begin) {
-            e = _this.warpEvent(e);
-
-            var _getMoved = _this.getMoved(e.pageX, e.pageY),
-                left = _getMoved.left,
-                top = _getMoved.top;
-
-            aim.style.left = left + "px";
-            aim.style.top = top + "px";
-        }
-    };
-    this.end = function (e) {
-        if (_this.state.begin) {
-            e = _this.warpEvent(e);
-
-            var _getMoved2 = _this.getMoved(e.pageX, e.pageY),
-                left = _getMoved2.left,
-                top = _getMoved2.top;
-
-            _this.state.begin = false;
-            _this.state.end = { left: left, top: top };
-            _this.dispatchEvent("end", { left: left, top: top });
-        }
-    };
-    this.moveTo = function (_ref) {
-        var left = _ref.left,
-            top = _ref.top;
-
-        aim.style.left = left + "px";
-        aim.style.top = top + "px";
-        _this.state.end = { left: left, top: top };
-        return _this;
-    };
-    this.start = function () {
-        lis.addEventListener("mousedown", this.begin);
-        document.addEventListener("mousemove", this.move);
-        document.addEventListener("mouseup", this.end);
-        lis.addEventListener("touchstart", this.begin);
-        document.addEventListener("touchmove", this.move);
-        document.addEventListener("touchend", this.end);
-        return this;
-    };
-    this.stop = function () {
-        lis.removeEventListener("mousedown", this.begin);
-        document.removeEventListener("mousemove", this.move);
-        document.removeEventListener("mouseup", this.end);
-        lis.removeEventListener("touchstart", this.begin);
-        document.removeEventListener("touchmove", this.move);
-        document.removeEventListener("touchend", this.end);
-        return this;
-    };
-}
-
-exports.default = Drag;
 
 /***/ })
 /******/ ]);

@@ -9,6 +9,7 @@ class DrawerSvg extends Drawer {
         return canvas;
     }
     init() {
+        this.current_indx = 0;
         this.penStyle = {
             fill: "rgba(0,0,0,0)",
             stroke: "red",
@@ -62,6 +63,7 @@ class DrawerSvg extends Drawer {
         // 清除画布
         this.dispatchEvent('beforeupdate');
         if (force) {
+            this.current_indx = 0;
             while (canvas.hasChildNodes())
                 canvas.removeChild(canvas.firstChild);
             this.currentDom = false;
@@ -78,14 +80,10 @@ class DrawerSvg extends Drawer {
             canvas.removeChild(this.currentDom);
             this.currentDom = false;
         }
-        var i = canvas.childNodes.length;
-        if (this.currentDom) {
-            i--;
-        }
         // 画历史数据
-        for (; i < config.history.length; i++) {
-            const item = config.history[i];
-            this.append(canvas, this.paintItem(item, i));
+        for (; this.current_indx < config.history.length; this.current_indx++) {
+            const item = config.history[this.current_indx];
+            this.append(canvas, this.paintItem(item, this.current_indx));
         }
         this.dispatchEvent('update');
     }
