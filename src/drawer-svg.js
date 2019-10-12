@@ -13,7 +13,9 @@ class DrawerSvg extends Drawer {
         this.penStyle = {
             fill: "rgba(0,0,0,0)",
             stroke: "red",
-            "stroke-width": 5
+            "font-size": '30px',
+            "stroke-width": 2,
+            "letter-spacing": '0px',
         };
     }
     getStyle() {
@@ -47,6 +49,9 @@ class DrawerSvg extends Drawer {
             html.replace(/\s+(\w+)=['"]([^'"]+)['"]/g, function(x0, key, value) {
                 svg.setAttribute(key, value);
             });
+            html.replace(/>([\s\S]+)</, function(x0, text) {
+                svg.innerHTML = text;
+            })
             if (this.currentDom) {
                 canvas.insertBefore(svg, this.currentDom);
             } else {

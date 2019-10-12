@@ -69,6 +69,12 @@ class Drawer {
         };
 
         const end = this.end = (endPoint, callBy) => {
+            if(callBy=="setPen") {
+                var ppap = getPen();
+                if (typeof ppap.close == "function") {
+                    ppap.close();
+                }
+            }
             if (!beginPoint) return;
             var ppap = getPen();
             if (typeof ppap.end == "function") {
@@ -183,8 +189,6 @@ class Drawer {
             return { offsetX, offsetY, normalized: true };
         }
     }
-
-
     setPen(penClass) {
         // 模拟mouseup
         this.end(this.outPoint, "setPen");

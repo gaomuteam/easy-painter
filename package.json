@@ -4,7 +4,9 @@
   "description": "a web painter by canvas,easy to use and extends",
   "main": "./dist/paint.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --config webpack.config.js --watch",
+    "build": "webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,21 +22,21 @@
     "url": "https://github.com/inu1255/easy-painter/issues"
   },
   "homepage": "https://github.com/inu1255/easy-painter#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "babel-preset-latest": "^6.24.1",
-    "less": "^2.7.3",
-    "postcss-flexbugs-fixes": "^3.2.0",
-    "webpack": "^3.8.1",
-    "yargs": "^10.0.3",
     "autoprefixer": "^7.1.6",
+    "babel-core": "^6.26.3",
     "babel-loader": "^7.1.2",
+    "babel-preset-latest": "^6.24.1",
     "css-loader": "^0.28.7",
     "file-loader": "^1.1.5",
+    "less": "^2.7.3",
     "less-loader": "^4.0.5",
+    "postcss-flexbugs-fixes": "^3.2.0",
     "postcss-loader": "^2.0.8",
     "style-loader": "^0.19.0",
-    "url-loader": "^0.6.2"
+    "url-loader": "^0.6.2",
+    "webpack": "^3.8.1",
+    "yargs": "^10.0.3"
   }
 }

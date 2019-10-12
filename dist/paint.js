@@ -7,7 +7,7 @@
 		exports["paint"] = factory();
 	else
 		root["paint"] = factory();
-})(this, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -86,27 +86,27 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _defaultPen = __webpack_require__(11);
+var _defaultPen = __webpack_require__(10);
 
 var _defaultPen2 = _interopRequireDefault(_defaultPen);
 
-var _linePen = __webpack_require__(12);
+var _linePen = __webpack_require__(11);
 
 var _linePen2 = _interopRequireDefault(_linePen);
 
-var _ellipsePen = __webpack_require__(13);
+var _ellipsePen = __webpack_require__(12);
 
 var _ellipsePen2 = _interopRequireDefault(_ellipsePen);
 
-var _rectPen = __webpack_require__(14);
+var _rectPen = __webpack_require__(13);
 
 var _rectPen2 = _interopRequireDefault(_rectPen);
 
-var _textPen = __webpack_require__(15);
+var _textPen = __webpack_require__(14);
 
 var _textPen2 = _interopRequireDefault(_textPen);
 
-var _eraser = __webpack_require__(16);
+var _eraser = __webpack_require__(15);
 
 var _eraser2 = _interopRequireDefault(_eraser);
 
@@ -170,437 +170,11 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Event = __webpack_require__(2);
-
-var _Event2 = _interopRequireDefault(_Event);
-
-var _pens = __webpack_require__(0);
-
-var _pens2 = _interopRequireDefault(_pens);
-
-var _Offset = __webpack_require__(3);
-
-var _Offset2 = _interopRequireDefault(_Offset);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var defaultPen = _pens2.default.get();
-
-if (!Object.assign) {
-    Object.assign = function (a, b) {
-        for (var k in b) {
-            var v = b[k];
-            a[k] = v;
-        }
-        return a;
-    };
-}
-
-var Drawer = function () {
-    function Drawer(dom, config) {
-        var _this = this;
-
-        _classCallCheck(this, Drawer);
-
-        _Event2.default.call(this);
-        var canvas = this.canvas = this.createCanvas();
-        var parent = this.dom = dom;
-        if (dom instanceof HTMLImageElement) {
-            parent = document.createElement("div");
-            Object.assign(parent.style, dom.style);
-            dom.parentElement.insertBefore(parent, dom);
-            dom.parentElement.removeChild(dom);
-            parent.appendChild(dom);
-        }
-        config = this.config = Object.assign(this.defaultConfig(), config);
-        this.init();
-
-        // 画笔实例
-        var pen;
-        // 鼠标按下位置
-        var beginPoint = false;
-        // 鼠标out位置
-        this.outPoint = false;
-
-        this.setData = function (data) {
-            if (typeof data == "undefined") return;
-            _this.config.penData = data;
-            _this.update();
-        };
-
-        function getPen() {
-            return pen;
-        }
-
-        var mousedown = function mousedown(event) {
-            var e = _this.normalizeEvent(event, config);
-            var ppap = getPen();
-            if (!beginPoint) beginPoint = { x: e.offsetX, y: e.offsetY };
-            if (typeof ppap.begin == "function") {
-                ppap.begin(beginPoint.x, beginPoint.y);
-            }
-            event.preventDefault();
-        };
-
-        var mousemove = function mousemove(event) {
-            var e = _this.normalizeEvent(event, config);
-            // console.log("move", e.offsetX, e.offsetY);
-            var ppap = getPen();
-            // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
-            if (!beginPoint && event.which == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
-            if (!beginPoint) return;
-            if (typeof ppap.move == "function") {
-                ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
-            }
-            event.preventDefault && event.preventDefault();
-        };
-
-        var end = this.end = function (endPoint, callBy) {
-            if (!beginPoint) return;
-            var ppap = getPen();
-            if (typeof ppap.end == "function") {
-                ppap.end(beginPoint.x, beginPoint.y, endPoint.x, endPoint.y, callBy);
-            }
-            beginPoint = false;
-        };
-
-        var mouseup = function mouseup(event) {
-            var e = _this.normalizeEvent(event, config);
-            end({ x: e.offsetX, y: e.offsetY });
-            event.preventDefault();
-        };
-
-        var mouseover = function mouseover(event) {
-            if (config.penClass.outEnd) {
-                // 在out时已经end了
-            } else if (_this.outPoint && event.which != 1) {
-                end(_this.outPoint, "mouseover");
-            }
-            _this.outPoint = false;
-        };
-
-        var mouseout = function mouseout(event) {
-            var e = _this.normalizeEvent(event, config);
-            // console.log("out", e.offsetX, e.offsetY);
-            _this.outPoint = { x: e.offsetX, y: e.offsetY };
-            if (event.toElement && event.toElement.parentElement == canvas) {
-                // console.log(this.outPoint);
-            } else if (config.penClass.outEnd) {
-                end(_this.outPoint, "mouseout");
-            } else if (event.which == 1) {
-                mousemove(e);
-            }
-        };
-        canvas.addEventListener("mousedown", mousedown);
-        canvas.addEventListener("mousemove", mousemove);
-        canvas.addEventListener("mouseup", mouseup);
-        canvas.addEventListener("touchstart", mousedown);
-        canvas.addEventListener("touchmove", mousemove);
-        canvas.addEventListener("touchend", mouseup);
-        canvas.addEventListener("mouseover", mouseover);
-        canvas.addEventListener("mouseout", mouseout);
-
-        var append = function append(div, x, y) {
-            if (div) {
-                div.className = "painter-canvas__item";
-                if (x != null) div.style.left = _this.warpData(x, canvas) + "px";
-                if (y != null) div.style.top = _this.warpData(y, canvas, 1) + "px";
-                parent.appendChild(div);
-            }
-            return parent;
-        };
-        var createNewPen = this.createNewPen = function () {
-            // 设置画笔鼠标指针样式
-            if (pen && typeof pen.unmount === "function") pen.unmount();
-            // canvas.style.cursor = config.penClass.cursor || 'auto';
-            pen = new config.penClass(_this.setData, penSuccess, append, _this);
-        };
-        // 画笔绘制结束回调
-        var penSuccess = function penSuccess(data) {
-            _this.dispatchEvent('success', data);
-            createNewPen();
-            if (typeof data != "undefined") {
-                config.history.push({ key: _pens2.default.key(config.penClass), data: data, style: _this.getStyle() });
-                config.penData = undefined;
-                config.redo.length = 0;
-                _this.update();
-            }
-        };
-        createNewPen();
-        parent.appendChild(canvas);
-        if (getComputedStyle(parent).position === "static") {
-            parent.style.position = "relative";
-        }
-        this.resize();
-    }
-
-    _createClass(Drawer, [{
-        key: 'defaultConfig',
-        value: function defaultConfig() {
-            return {
-                history: [],
-                redo: [],
-                penClass: defaultPen
-            };
-        }
-    }, {
-        key: 'warpData',
-        value: function warpData(data, i) {
-            var config = this.config;
-            if (data instanceof Array) {
-                var list = [];
-                for (var i = 0; i < data.length; i++) {
-                    var item = data[i];
-                    list.push(this.warpData(item, i));
-                }
-                return list;
-            }
-            if (typeof data === "number") {
-                return (i & 1 ? config.height : config.width) * data / 10000;
-            }
-            return data;
-        }
-    }, {
-        key: 'normalizeEvent',
-        value: function normalizeEvent(e, config) {
-            if (e.normalized) {
-                return e;
-            }
-            if (e instanceof TouchEvent) {
-                var off = (0, _Offset2.default)(e.target);
-                var offsetX = Math.floor((e.touches[0].pageX - off.top) / config.width * 10000);
-                var offsetY = Math.floor((e.touches[0].pageY - off.left) / config.height * 10000);
-                return { offsetX: offsetX, offsetY: offsetY, normalized: true };
-            } else {
-                var offsetX = Math.floor(e.offsetX / config.width * 10000);
-                var offsetY = Math.floor(e.offsetY / config.height * 10000);
-                return { offsetX: offsetX, offsetY: offsetY, normalized: true };
-            }
-        }
-    }, {
-        key: 'setPen',
-        value: function setPen(penClass) {
-            // 模拟mouseup
-            this.end(this.outPoint, "setPen");
-            // 设置为默认画笔
-            if (typeof penClass === "string") {
-                if (this._prevPenClass) {
-                    this.canvas.classList.remove(this._prevPenClass);
-                }
-                this._prevPenClass = penClass;
-                this.canvas.classList.add(penClass);
-            }
-            if (typeof penClass == "undefined") penClass = defaultPen;
-            var tmp = _pens2.default.get(penClass);
-            if (tmp) {
-                // 清除没有完成的画笔数据
-                if (this.config.penClass != tmp) {
-                    this.config.penClass = tmp;
-                    this.config.penData = undefined;
-                }
-                // 创建画笔
-                this.createNewPen();
-            } else {
-                console.log("不能识别的画笔", penClass);
-            }
-        }
-    }, {
-        key: 'stringify',
-        value: function stringify() {
-            return JSON.stringify(this.config.history);
-        }
-    }, {
-        key: 'parse',
-        value: function parse(data) {
-            if (typeof data === "string") {
-                this.config.history = JSON.parse(data);
-            } else if (data instanceof Array) {
-                this.config.history = data;
-            } else {
-                return;
-            }
-            this.update(true);
-        }
-    }, {
-        key: 'undo',
-        value: function undo(test) {
-            if (this.config.history.length > 0) {
-                if (test) return true;
-                this.config.redo.push(this.config.history.pop());
-                this.update(true);
-            }
-        }
-    }, {
-        key: 'redo',
-        value: function redo(test) {
-            if (this.config.redo.length > 0) {
-                if (test) return true;
-                this.config.history.push(this.config.redo.pop());
-                this.update();
-            }
-        }
-    }, {
-        key: 'getCanvas',
-        value: function getCanvas() {
-            return this.canvas;
-        }
-    }, {
-        key: 'resize',
-        value: function resize() {
-            var modify = false;
-            var dom = this.dom,
-                config = this.config;
-
-            if (dom.offsetWidth != config.width) {
-                modify = true;
-                config.width = dom.scrollWidth || dom.offsetWidth;
-            }
-            if (dom.offsetHeight != config.height) {
-                modify = true;
-                config.height = dom.scrollHeight || dom.offsetHeight;
-            }
-            return modify;
-        }
-    }, {
-        key: 'offset',
-        value: function offset() {
-            return (0, _Offset2.default)(this.canvas);
-        }
-    }, {
-        key: 'disable',
-        value: function disable() {
-            this.canvas.classList.add("disable");
-        }
-    }, {
-        key: 'enable',
-        value: function enable() {
-            this.canvas.classList.remove("disable");
-        }
-    }, {
-        key: 'scale',
-        value: function scale(n) {
-            this.canvas.parentElement.style.transformOrigin = "50% 0 0";
-            this.canvas.parentElement.style.transform = 'scale(' + n + ')'; // translate(${})`;
-            this.update();
-        }
-    }, {
-        key: 'init',
-        value: function init() {}
-    }, {
-        key: 'createCanvas',
-        value: function createCanvas() {}
-    }, {
-        key: 'getStyle',
-        value: function getStyle() {}
-    }, {
-        key: 'update',
-        value: function update() {}
-    }]);
-
-    return Drawer;
-}();
-
-exports.default = Drawer;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-function Event() {
-    var _listeners = {};
-    // 添加
-    this.addEventListener = function (type, fn) {
-        if (typeof _listeners[type] === "undefined") {
-            _listeners[type] = [];
-        }
-        if (typeof fn === "function") {
-            _listeners[type].push(fn);
-        }
-        return this;
-    };
-    // 触发
-    this.dispatchEvent = function (type, data) {
-        var arrayEvent = _listeners[type];
-        if (arrayEvent instanceof Array) {
-            for (var i = 0, length = arrayEvent.length; i < length; i += 1) {
-                if (typeof arrayEvent[i] === "function") {
-                    arrayEvent[i](data);
-                }
-            }
-        }
-        return this;
-    };
-    // 删除
-    this.removeEventListener = function (type, fn) {
-        var arrayEvent = _listeners[type];
-        if (typeof type === "string" && arrayEvent instanceof Array) {
-            if (typeof fn === "function") {
-                // 清除当前type类型事件下对应fn方法
-                for (var i = 0, length = arrayEvent.length; i < length; i += 1) {
-                    if (arrayEvent[i] === fn) {
-                        _listeners[type].splice(i, 1);
-                        break;
-                    }
-                }
-            } else if (typeof fn === "undefined") {
-                // 如果仅仅参数type，则所有type类型事件清除
-                delete _listeners[type];
-            }
-        }
-        return this;
-    };
-}
-
-exports.default = Event;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-function offset(who) {
-    var box = who.getBoundingClientRect();
-    return {
-        top: box.top + window.pageYOffset - document.documentElement.clientTop,
-        left: box.left + window.pageXOffset - document.documentElement.clientLeft,
-        right: box.right,
-        bottom: box.bottom
-    };
-}
-
-exports.default = offset;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 exports.pens = exports.Drawer = undefined;
 
-__webpack_require__(5);
+__webpack_require__(2);
 
-var _drawerSvg = __webpack_require__(10);
+var _drawerSvg = __webpack_require__(7);
 
 var _drawerSvg2 = _interopRequireDefault(_drawerSvg);
 
@@ -628,13 +202,13 @@ exports.pens = _pens2.default;
 // };
 
 /***/ }),
-/* 5 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(6);
+var content = __webpack_require__(3);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -642,14 +216,14 @@ var transform;
 var options = {"hmr":true}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(8)(content, options);
+var update = __webpack_require__(5)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
 	// When the styles change, update the <style> tags
 	if(!content.locals) {
-		module.hot.accept("!!../node_modules/_css-loader@0.28.7@css-loader/index.js??ref--0-oneOf-3-1!../node_modules/_postcss-loader@2.0.8@postcss-loader/lib/index.js??postcss!../node_modules/_less-loader@4.0.5@less-loader/dist/cjs.js??ref--0-oneOf-3-3!./index.less", function() {
-			var newContent = require("!!../node_modules/_css-loader@0.28.7@css-loader/index.js??ref--0-oneOf-3-1!../node_modules/_postcss-loader@2.0.8@postcss-loader/lib/index.js??postcss!../node_modules/_less-loader@4.0.5@less-loader/dist/cjs.js??ref--0-oneOf-3-3!./index.less");
+		module.hot.accept("!!../node_modules/css-loader/index.js??ref--0-oneOf-3-1!../node_modules/postcss-loader/lib/index.js??postcss!../node_modules/less-loader/dist/cjs.js??ref--0-oneOf-3-3!./index.less", function() {
+			var newContent = require("!!../node_modules/css-loader/index.js??ref--0-oneOf-3-1!../node_modules/postcss-loader/lib/index.js??postcss!../node_modules/less-loader/dist/cjs.js??ref--0-oneOf-3-3!./index.less");
 			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 			update(newContent);
 		});
@@ -659,10 +233,10 @@ if(false) {
 }
 
 /***/ }),
-/* 6 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(7)(undefined);
+exports = module.exports = __webpack_require__(4)(false);
 // imports
 
 
@@ -673,7 +247,7 @@ exports.push([module.i, "/**\n * Created Date: 2017-10-16 09:27:09\n * Author: i
 
 
 /***/ }),
-/* 7 */
+/* 4 */
 /***/ (function(module, exports) {
 
 /*
@@ -755,7 +329,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 8 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -811,7 +385,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(9);
+var	fixUrls = __webpack_require__(6);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -824,7 +398,7 @@ module.exports = function(list, options) {
 
 	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
 	// tags it will allow on a page
-	if (!options.singleton) options.singleton = isOldIE();
+	if (!options.singleton && typeof options.singleton !== "boolean") options.singleton = isOldIE();
 
 	// By default, add <style> tags to the <head> element
 	if (!options.insertInto) options.insertInto = "head";
@@ -1127,7 +701,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 9 */
+/* 6 */
 /***/ (function(module, exports) {
 
 
@@ -1222,7 +796,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 10 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1236,7 +810,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _drawer = __webpack_require__(1);
+var _drawer = __webpack_require__(8);
 
 var _drawer2 = _interopRequireDefault(_drawer);
 
@@ -1276,7 +850,9 @@ var DrawerSvg = function (_Drawer) {
             this.penStyle = {
                 fill: "rgba(0,0,0,0)",
                 stroke: "red",
-                "stroke-width": 5
+                "font-size": '30px',
+                "stroke-width": 2,
+                "letter-spacing": '0px'
             };
         }
     }, {
@@ -1319,6 +895,9 @@ var DrawerSvg = function (_Drawer) {
                 svg = document.createElementNS('http://www.w3.org/2000/svg', /<(\w+)/.exec(html)[1]);
                 html.replace(/\s+(\w+)=['"]([^'"]+)['"]/g, function (x0, key, value) {
                     svg.setAttribute(key, value);
+                });
+                html.replace(/>([\s\S]+)</, function (x0, text) {
+                    svg.innerHTML = text;
                 });
                 if (this.currentDom) {
                     canvas.insertBefore(svg, this.currentDom);
@@ -1423,7 +1002,417 @@ var DrawerSvg = function (_Drawer) {
 exports.default = DrawerSvg;
 
 /***/ }),
-/* 11 */
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Event = __webpack_require__(9);
+
+var _Event2 = _interopRequireDefault(_Event);
+
+var _pens = __webpack_require__(0);
+
+var _pens2 = _interopRequireDefault(_pens);
+
+var _Offset = __webpack_require__(16);
+
+var _Offset2 = _interopRequireDefault(_Offset);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var defaultPen = _pens2.default.get();
+
+if (!Object.assign) {
+    Object.assign = function (a, b) {
+        for (var k in b) {
+            var v = b[k];
+            a[k] = v;
+        }
+        return a;
+    };
+}
+
+var Drawer = function () {
+    function Drawer(dom, config) {
+        var _this = this;
+
+        _classCallCheck(this, Drawer);
+
+        _Event2.default.call(this);
+        var canvas = this.canvas = this.createCanvas();
+        var parent = this.dom = dom;
+        if (dom instanceof HTMLImageElement) {
+            parent = document.createElement("div");
+            Object.assign(parent.style, dom.style);
+            dom.parentElement.insertBefore(parent, dom);
+            dom.parentElement.removeChild(dom);
+            parent.appendChild(dom);
+        }
+        config = this.config = Object.assign(this.defaultConfig(), config);
+        this.init();
+
+        // 画笔实例
+        var pen;
+        // 鼠标按下位置
+        var beginPoint = false;
+        // 鼠标out位置
+        this.outPoint = false;
+
+        this.setData = function (data) {
+            if (typeof data == "undefined") return;
+            _this.config.penData = data;
+            _this.update();
+        };
+
+        function getPen() {
+            return pen;
+        }
+
+        var mousedown = function mousedown(event) {
+            var e = _this.normalizeEvent(event, config);
+            var ppap = getPen();
+            if (!beginPoint) beginPoint = { x: e.offsetX, y: e.offsetY };
+            if (typeof ppap.begin == "function") {
+                ppap.begin(beginPoint.x, beginPoint.y);
+            }
+            event.preventDefault();
+        };
+
+        var mousemove = function mousemove(event) {
+            var e = _this.normalizeEvent(event, config);
+            // console.log("move", e.offsetX, e.offsetY);
+            var ppap = getPen();
+            // 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
+            if (!beginPoint && event.which == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
+            if (!beginPoint) return;
+            if (typeof ppap.move == "function") {
+                ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
+            }
+            event.preventDefault && event.preventDefault();
+        };
+
+        var end = this.end = function (endPoint, callBy) {
+            if (callBy == "setPen") {
+                var ppap = getPen();
+                if (typeof ppap.close == "function") {
+                    ppap.close();
+                }
+            }
+            if (!beginPoint) return;
+            var ppap = getPen();
+            if (typeof ppap.end == "function") {
+                ppap.end(beginPoint.x, beginPoint.y, endPoint.x, endPoint.y, callBy);
+            }
+            beginPoint = false;
+        };
+
+        var mouseup = function mouseup(event) {
+            var e = _this.normalizeEvent(event, config);
+            end({ x: e.offsetX, y: e.offsetY });
+            event.preventDefault();
+        };
+
+        var mouseover = function mouseover(event) {
+            if (config.penClass.outEnd) {
+                // 在out时已经end了
+            } else if (_this.outPoint && event.which != 1) {
+                end(_this.outPoint, "mouseover");
+            }
+            _this.outPoint = false;
+        };
+
+        var mouseout = function mouseout(event) {
+            var e = _this.normalizeEvent(event, config);
+            // console.log("out", e.offsetX, e.offsetY);
+            _this.outPoint = { x: e.offsetX, y: e.offsetY };
+            if (event.toElement && event.toElement.parentElement == canvas) {
+                // console.log(this.outPoint);
+            } else if (config.penClass.outEnd) {
+                end(_this.outPoint, "mouseout");
+            } else if (event.which == 1) {
+                mousemove(e);
+            }
+        };
+        canvas.addEventListener("mousedown", mousedown);
+        canvas.addEventListener("mousemove", mousemove);
+        canvas.addEventListener("mouseup", mouseup);
+        canvas.addEventListener("touchstart", mousedown);
+        canvas.addEventListener("touchmove", mousemove);
+        canvas.addEventListener("touchend", mouseup);
+        canvas.addEventListener("mouseover", mouseover);
+        canvas.addEventListener("mouseout", mouseout);
+
+        var append = function append(div, x, y) {
+            if (div) {
+                div.className = "painter-canvas__item";
+                if (x != null) div.style.left = _this.warpData(x, canvas) + "px";
+                if (y != null) div.style.top = _this.warpData(y, canvas, 1) + "px";
+                parent.appendChild(div);
+            }
+            return parent;
+        };
+        var createNewPen = this.createNewPen = function () {
+            // 设置画笔鼠标指针样式
+            if (pen && typeof pen.unmount === "function") pen.unmount();
+            // canvas.style.cursor = config.penClass.cursor || 'auto';
+            pen = new config.penClass(_this.setData, penSuccess, append, _this);
+        };
+        // 画笔绘制结束回调
+        var penSuccess = function penSuccess(data) {
+            _this.dispatchEvent('success', data);
+            createNewPen();
+            if (typeof data != "undefined") {
+                config.history.push({ key: _pens2.default.key(config.penClass), data: data, style: _this.getStyle() });
+                config.penData = undefined;
+                config.redo.length = 0;
+                _this.update();
+            }
+        };
+        createNewPen();
+        parent.appendChild(canvas);
+        if (getComputedStyle(parent).position === "static") {
+            parent.style.position = "relative";
+        }
+        this.resize();
+    }
+
+    _createClass(Drawer, [{
+        key: 'defaultConfig',
+        value: function defaultConfig() {
+            return {
+                history: [],
+                redo: [],
+                penClass: defaultPen
+            };
+        }
+    }, {
+        key: 'warpData',
+        value: function warpData(data, i) {
+            var config = this.config;
+            if (data instanceof Array) {
+                var list = [];
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    list.push(this.warpData(item, i));
+                }
+                return list;
+            }
+            if (typeof data === "number") {
+                return (i & 1 ? config.height : config.width) * data / 10000;
+            }
+            return data;
+        }
+    }, {
+        key: 'normalizeEvent',
+        value: function normalizeEvent(e, config) {
+            if (e.normalized) {
+                return e;
+            }
+            if (e instanceof TouchEvent) {
+                var off = (0, _Offset2.default)(e.target);
+                var offsetX = Math.floor((e.touches[0].pageX - off.top) / config.width * 10000);
+                var offsetY = Math.floor((e.touches[0].pageY - off.left) / config.height * 10000);
+                return { offsetX: offsetX, offsetY: offsetY, normalized: true };
+            } else {
+                var offsetX = Math.floor(e.offsetX / config.width * 10000);
+                var offsetY = Math.floor(e.offsetY / config.height * 10000);
+                return { offsetX: offsetX, offsetY: offsetY, normalized: true };
+            }
+        }
+    }, {
+        key: 'setPen',
+        value: function setPen(penClass) {
+            // 模拟mouseup
+            this.end(this.outPoint, "setPen");
+            // 设置为默认画笔
+            if (typeof penClass === "string") {
+                if (this._prevPenClass) {
+                    this.canvas.classList.remove(this._prevPenClass);
+                }
+                this._prevPenClass = penClass;
+                this.canvas.classList.add(penClass);
+            }
+            if (typeof penClass == "undefined") penClass = defaultPen;
+            var tmp = _pens2.default.get(penClass);
+            if (tmp) {
+                // 清除没有完成的画笔数据
+                if (this.config.penClass != tmp) {
+                    this.config.penClass = tmp;
+                    this.config.penData = undefined;
+                }
+                // 创建画笔
+                this.createNewPen();
+            } else {
+                console.log("不能识别的画笔", penClass);
+            }
+        }
+    }, {
+        key: 'stringify',
+        value: function stringify() {
+            return JSON.stringify(this.config.history);
+        }
+    }, {
+        key: 'parse',
+        value: function parse(data) {
+            if (typeof data === "string") {
+                this.config.history = JSON.parse(data);
+            } else if (data instanceof Array) {
+                this.config.history = data;
+            } else {
+                return;
+            }
+            this.update(true);
+        }
+    }, {
+        key: 'undo',
+        value: function undo(test) {
+            if (this.config.history.length > 0) {
+                if (test) return true;
+                this.config.redo.push(this.config.history.pop());
+                this.update(true);
+            }
+        }
+    }, {
+        key: 'redo',
+        value: function redo(test) {
+            if (this.config.redo.length > 0) {
+                if (test) return true;
+                this.config.history.push(this.config.redo.pop());
+                this.update();
+            }
+        }
+    }, {
+        key: 'getCanvas',
+        value: function getCanvas() {
+            return this.canvas;
+        }
+    }, {
+        key: 'resize',
+        value: function resize() {
+            var modify = false;
+            var dom = this.dom,
+                config = this.config;
+
+            if (dom.offsetWidth != config.width) {
+                modify = true;
+                config.width = dom.scrollWidth || dom.offsetWidth;
+            }
+            if (dom.offsetHeight != config.height) {
+                modify = true;
+                config.height = dom.scrollHeight || dom.offsetHeight;
+            }
+            return modify;
+        }
+    }, {
+        key: 'offset',
+        value: function offset() {
+            return (0, _Offset2.default)(this.canvas);
+        }
+    }, {
+        key: 'disable',
+        value: function disable() {
+            this.canvas.classList.add("disable");
+        }
+    }, {
+        key: 'enable',
+        value: function enable() {
+            this.canvas.classList.remove("disable");
+        }
+    }, {
+        key: 'scale',
+        value: function scale(n) {
+            this.canvas.parentElement.style.transformOrigin = "50% 0 0";
+            this.canvas.parentElement.style.transform = 'scale(' + n + ')'; // translate(${})`;
+            this.update();
+        }
+    }, {
+        key: 'init',
+        value: function init() {}
+    }, {
+        key: 'createCanvas',
+        value: function createCanvas() {}
+    }, {
+        key: 'getStyle',
+        value: function getStyle() {}
+    }, {
+        key: 'update',
+        value: function update() {}
+    }]);
+
+    return Drawer;
+}();
+
+exports.default = Drawer;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function Event() {
+    var _listeners = {};
+    // 添加
+    this.addEventListener = function (type, fn) {
+        if (typeof _listeners[type] === "undefined") {
+            _listeners[type] = [];
+        }
+        if (typeof fn === "function") {
+            _listeners[type].push(fn);
+        }
+        return this;
+    };
+    // 触发
+    this.dispatchEvent = function (type, data) {
+        var arrayEvent = _listeners[type];
+        if (arrayEvent instanceof Array) {
+            for (var i = 0, length = arrayEvent.length; i < length; i += 1) {
+                if (typeof arrayEvent[i] === "function") {
+                    arrayEvent[i](data);
+                }
+            }
+        }
+        return this;
+    };
+    // 删除
+    this.removeEventListener = function (type, fn) {
+        var arrayEvent = _listeners[type];
+        if (typeof type === "string" && arrayEvent instanceof Array) {
+            if (typeof fn === "function") {
+                // 清除当前type类型事件下对应fn方法
+                for (var i = 0, length = arrayEvent.length; i < length; i += 1) {
+                    if (arrayEvent[i] === fn) {
+                        _listeners[type].splice(i, 1);
+                        break;
+                    }
+                }
+            } else if (typeof fn === "undefined") {
+                // 如果仅仅参数type，则所有type类型事件清除
+                delete _listeners[type];
+            }
+        }
+        return this;
+    };
+}
+
+exports.default = Event;
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1489,7 +1478,7 @@ defaultPen.renderSvg = function (data, drawer) {
 exports.default = defaultPen;
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1526,7 +1515,7 @@ linePen.renderSvg = function (data, drawer) {
 exports.default = linePen;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1577,7 +1566,7 @@ ellipsePen.renderSvg = function (data, drawer) {
 exports.default = ellipsePen;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1621,7 +1610,7 @@ rectPen.renderSvg = function (data, drawer) {
 exports.default = rectPen;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1631,70 +1620,88 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 function textPen(render, resolve, append) {
-    this.move = function (bx, by, ex, ey) {
-        render([bx, by, ex, ey]);
+    var input, dom, tmp;
+
+    this.close = this.begin = function () {
+        if (tmp) {
+            resolve(tmp);
+            tmp = null;
+        }
+        if (dom) try {
+            dom.removeChild(input);
+        } catch (error) {}
     };
     this.end = function (bx, by, ex, ey) {
-        var input = document.createElement("textarea");
-        input.addEventListener("blur", function () {
-            resolve([bx, by, ex, ey, input.value]);
-            try {
-                dom.removeChild(input);
-            } catch (error) {}
-        });
+        var _this = this;
+
+        tmp = [bx, by];
+        input = document.createElement("textarea");
         input.addEventListener("keyup", function (e) {
             if (e.ctrlKey && e.keyCode == 13) {
-                resolve([bx, by, ex, ey, input.value]);
-                try {
-                    dom.removeChild(input);
-                } catch (error) {}
+                _this.close();
             } else {
-                render([bx, by, ex, ey, input.value]);
+                tmp[2] = input.value;
+                render(tmp);
             }
         });
-        var dom = append(input, bx, by);
+        dom = append(input, ex, ey);
         input.focus();
     };
 }
-textPen.font = "16px serif";
 textPen.render = function (data, drawer) {
     if (data && data.length >= 4) {
         var ctx = drawer.ctx;
-        ctx.beginPath();
-        var bx = data[0],
-            by = data[1],
-            ex = data[2],
-            ey = data[3];
-        var xei = Math.atan((ey - by) / (ex - bx));
-        var deg = 0.5;
-        ctx.moveTo(bx, by);
-        ctx.lineTo(ex, ey);
-        if (ex > bx) {
-            ctx.lineTo(ex - 10 * Math.cos(deg - xei), ey + 10 * Math.sin(deg - xei));
-            ctx.lineTo(ex - 10 * Math.cos(deg + xei), ey - 10 * Math.sin(deg + xei));
-        } else {
-            ctx.lineTo(ex + 10 * Math.cos(deg - xei), ey - 10 * Math.sin(deg - xei));
-            ctx.lineTo(ex + 10 * Math.cos(deg + xei), ey + 10 * Math.sin(deg + xei));
-        }
-        ctx.lineTo(ex, ey);
-        ctx.stroke();
-        ctx.fill();
         ctx.font = textPen.font;
-        var text = data[4] || "";
-        var x = data[2];
-        var y = data[3];
+        var text = data[2] || "";
+        var x = data[0];
+        var y = data[1];
         var size = parseInt(textPen.font);
-        if (data[3] > data[1]) y += size;
         text.split("\n").forEach(function (item, i) {
             ctx.fillText(item, x, y + i * size);
         });
     }
 };
+textPen.renderSvg = function (data, drawer) {
+    if (data && data.length === 3) {
+        var x = data[0];
+        var y = data[1];
+        var size = parseInt(drawer.penStyle['font-size']);
+        var texts = "";
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = (data[2] || '').split('\n')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var text = _step.value;
+
+                texts += "<text x=\"" + x + "\" y=\"" + y + "\" style=\"" + drawer.getStyle() + "\">" + text + "</text>";
+                y += size;
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+
+        return "<g>" + texts + "</g>";
+    }
+    return "";
+};
 
 exports.default = textPen;
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1779,6 +1786,28 @@ eraser.renderSvg = function (data, drawer) {
 };
 
 exports.default = eraser;
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function offset(who) {
+    var box = who.getBoundingClientRect();
+    return {
+        top: box.top + window.pageYOffset - document.documentElement.clientTop,
+        left: box.left + window.pageXOffset - document.documentElement.clientLeft,
+        right: box.right,
+        bottom: box.bottom
+    };
+}
+
+exports.default = offset;
 
 /***/ })
 /******/ ]);

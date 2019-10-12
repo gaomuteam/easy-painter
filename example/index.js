@@ -72,7 +72,7 @@
     }];
 
     paint.Paint = function(dom, history) {
-        var drawer = new paint.Drawer(dom);
+        var drawer = new paint.DrawerSvg(dom);
         drawer.preview = function() {
             drawer.disable();
             if (drawer.menu) drawer.menu.disable();
