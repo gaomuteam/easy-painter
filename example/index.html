@@ -2,64 +2,68 @@
 <html lang="zh-cn">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#000000">
-    <title>easy-painter</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+	<title>easy-painter</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+		}
 
-        .header {
-            height: 44px;
-            width: 100%;
-            border-bottom: 1px solid #ccc;
-            background: #eee;
-        }
+		.header {
+			height: 44px;
+			width: 100%;
+			border-bottom: 1px solid #ccc;
+			background: #eee;
+		}
 
-        #root {
-            width: 50%;
-            padding: 12px;
-            margin: auto;
-        }
+		#root {
+			width: 50%;
+			padding: 12px;
+			margin: auto;
+		}
 
-        img {
-            width: 100%;
-        }
-    </style>
+		img {
+			width: 100%;
+		}
+	</style>
 </head>
 
 <body>
-    <noscript>
-      您需要启用JavaScript才能正常访问本网页.
-    </noscript>
-    <div>
-        <div class="header"></div>
-        <div id="root">
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <img id="i1" src="demo.png" alt="">
-            <p>这是一个题目</p>
-            <img id="i2" src="demo.png" alt="">
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-            <p>这是一个题目</p>
-        </div>
-    </div>
-    <script src="../dist/paint.js"></script>
-    <script src="./index.js"></script>
-    <script>
-        var d1 = paint.Paint(document.getElementById("i1"))
-        var d2 = paint.Paint(document.getElementById("i2"),[{"key":"rectPen","data":[3906,4211,6171,6371],"style":{}}])
-    </script>
+	<noscript>
+		您需要启用JavaScript才能正常访问本网页.
+	</noscript>
+	<div>
+		<div class="header"></div>
+		<div id="root">
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<img id="i1" src="demo.png" alt="">
+			<p>这是一个题目</p>
+			<img id="i2" src="demo.png" alt="">
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+			<p>这是一个题目</p>
+		</div>
+	</div>
+	<script src="../dist/paint.js"></script>
+	<script src="./index.js"></script>
+	<script>
+		var d1 = paint.Paint(document.getElementById("i1"))
+		var d2 = paint.Paint(document.getElementById("i2"), [{
+			"key": "rectPen",
+			"data": [3906, 4211, 6171, 6371],
+			"style": {}
+		}])
+	</script>
 </body>
 
 </html>

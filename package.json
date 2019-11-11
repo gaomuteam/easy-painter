@@ -1,42 +1,47 @@
 {
-  "name": "easy-painter",
-  "version": "1.0.2",
-  "description": "a web painter by canvas,easy to use and extends",
-  "main": "./dist/paint.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack --config webpack.config.js --watch",
-    "build": "webpack --config webpack.config.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/inu1255/easy-painter.git"
-  },
-  "keywords": [
-    "painter",
-    "canvas"
-  ],
-  "author": "inu1255",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/inu1255/easy-painter/issues"
-  },
-  "homepage": "https://github.com/inu1255/easy-painter#readme",
-  "dependencies": {},
-  "devDependencies": {
-    "autoprefixer": "^7.1.6",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.2",
-    "babel-preset-latest": "^6.24.1",
-    "css-loader": "^0.28.7",
-    "file-loader": "^1.1.5",
-    "less": "^2.7.3",
-    "less-loader": "^4.0.5",
-    "postcss-flexbugs-fixes": "^3.2.0",
-    "postcss-loader": "^2.0.8",
-    "style-loader": "^0.19.0",
-    "url-loader": "^0.6.2",
-    "webpack": "^3.8.1",
-    "yargs": "^10.0.3"
-  }
+	"name": "easy-painter",
+	"version": "1.0.2",
+	"description": "a web painter by canvas,easy to use and extends",
+	"main": "./dist/paint.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "webpack --config webpack.config.js --watch",
+		"server-start": "webpack-dev-server --open",
+		"build": "webpack --config webpack.config.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/inu1255/easy-painter.git"
+	},
+	"keywords": [
+		"painter",
+		"canvas"
+	],
+	"author": "inu1255",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/inu1255/easy-painter/issues"
+	},
+	"homepage": "https://github.com/inu1255/easy-painter#readme",
+	"dependencies": {},
+	"devDependencies": {
+		"@babel/core": "^7.6.4",
+		"@babel/preset-env": "^7.6.3",
+		"autoprefixer": "^9.7.1",
+		"babel-loader": "^8.0.6",
+		"css-loader": "^3.2.0",
+		"file-loader": "^4.2.0",
+		"less": "^3.10.3",
+		"less-loader": "^5.0.0",
+		"postcss-flexbugs-fixes": "^4.1.0",
+		"postcss-loader": "^3.0.0",
+		"style-loader": "^1.0.0",
+		"uglifyjs-webpack-plugin": "^2.2.0",
+		"url-loader": "^2.2.0",
+		"vconsole-webpack-plugin": "^1.4.2",
+		"webpack": "^4.41.2",
+		"webpack-cli": "^3.3.10",
+		"webpack-dev-server": "^3.9.0",
+		"yargs": "^14.2.0"
+	}
 }
