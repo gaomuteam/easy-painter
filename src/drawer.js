@@ -53,6 +53,7 @@ class Drawer {
 				ppap.begin(beginPoint.x, beginPoint.y);
 			}
 			event.preventDefault();
+			event.stopPropagation();
 		};
 
 		const mousemove = (event) => {
@@ -66,6 +67,7 @@ class Drawer {
 				ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
 			}
 			event.preventDefault && event.preventDefault();
+			event.stopPropagation();
 		};
 
 		const end = this.end = (endPoint, callBy) => {
@@ -87,6 +89,7 @@ class Drawer {
 			var e = this.normalizeEvent(event, config);
 			end({ x: e.offsetX, y: e.offsetY });
 			event.preventDefault();
+			event.stopPropagation();
 		};
 
 		const mouseover = (event) => {
@@ -118,34 +121,6 @@ class Drawer {
 		canvas.addEventListener("touchend", mouseup);
 		canvas.addEventListener("mouseover", mouseover);
 		canvas.addEventListener("mouseout", mouseout);
-
-		// debug
-		// canvas.addEventListener("mousedown", function (e) {
-		// 	console.log("mousedown:",e);
-		// });
-		// canvas.addEventListener("mousemove", function (e) {
-		// 	console.log("mousemove:",e);
-		// });
-		// canvas.addEventListener("mouseup", function (e) {
-		// 	console.log("mouseup:",e);
-		// });
-		// canvas.addEventListener("mouseover", function (e) {
-		//     console.log("mouseover:",e);
-		// });
-		// canvas.addEventListener("mouseout", function (e) {
-		//     console.log("mouseout:",e);
-		// });
-		// canvas.addEventListener("touchstart", function (e) {
-		// 	console.log("touchstart:",e.type,' :',e.touches,' :',e.changedTouches);
-		// });
-		// canvas.addEventListener("touchmove", function (e) {
-		// 	console.log("touchmove:",e.type,' :',e.touches,' :',e.changedTouches);
-		// });
-		// canvas.addEventListener("touchend", function (e) {
-		// 	console.log("touchend:",e.type,' :',e.touches,' :',e.changedTouches);
-		// });
-
-
 
 		const append = (div, x, y) => {
 			if (div) {

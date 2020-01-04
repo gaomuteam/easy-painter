@@ -1,6 +1,7 @@
 import defaultPen from './defaultPen.js';
 import linePen from './linePen.js';
 import ellipsePen from './ellipsePen.js';
+import circlePen from './circlePen.js';
 import rectPen from './rectPen.js';
 import textPen from './textPen.js';
 import eraser from './eraser.js';
@@ -9,9 +10,11 @@ var map = {
     defaultPen,
     linePen,
     ellipsePen,
+    circlePen,
     rectPen,
     textPen,
     eraser,
+
 };
 
 function get(key) {

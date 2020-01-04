@@ -55,6 +55,9 @@
  		"html": "椭圆",
  		"key": "ellipsePen"
  	}, {
+		"html": "圆",
+		"key": "circlePen"
+	}, {
  		"html": "矩形",
  		"key": "rectPen"
  	}, {
