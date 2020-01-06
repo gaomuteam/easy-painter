@@ -52,13 +52,12 @@ class Drawer {
 			if (typeof ppap.begin == "function") {
 				ppap.begin(beginPoint.x, beginPoint.y);
 			}
-			event.preventDefault();
-			event.stopPropagation();
+			(typeof event.preventDefault === 'function') && event.preventDefault();
+			(typeof event.stopPropagation === 'function') && event.stopPropagation();
 		};
 
 		const mousemove = (event) => {
 			var e = this.normalizeEvent(event, config);
-			// console.log("move", e.offsetX, e.offsetY);
 			var ppap = getPen();
 			// 在画图状态下，当鼠标按下时move事件也可以设置begin坐标
 			if (!beginPoint && event.which == 1 && config.penClass.moveBegin) beginPoint = { x: e.offsetX, y: e.offsetY, moveBegin: true };
@@ -66,8 +65,8 @@ class Drawer {
 			if (typeof ppap.move == "function") {
 				ppap.move(beginPoint.x, beginPoint.y, e.offsetX, e.offsetY);
 			}
-			event.preventDefault && event.preventDefault();
-			event.stopPropagation();
+			(typeof event.preventDefault === 'function') && event.preventDefault();
+			(typeof event.stopPropagation === 'function') && event.stopPropagation();
 		};
 
 		const end = this.end = (endPoint, callBy) => {
@@ -88,8 +87,8 @@ class Drawer {
 		const mouseup = (event) => {
 			var e = this.normalizeEvent(event, config);
 			end({ x: e.offsetX, y: e.offsetY });
-			event.preventDefault();
-			event.stopPropagation();
+			(typeof event.preventDefault === 'function') && event.preventDefault();
+			(typeof event.stopPropagation === 'function') && event.stopPropagation();
 		};
 
 		const mouseover = (event) => {

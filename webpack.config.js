@@ -9,7 +9,7 @@ let libraryName = 'paint';
 let plugins = [];
 let outputFile;
 
-let env = "development";//development production
+let env = "production";//development production
 if (env === 'production') {
 	plugins.push(new UglifyJsPlugin({}));
 	outputFile = libraryName + '.min.js';

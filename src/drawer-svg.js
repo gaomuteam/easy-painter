@@ -95,15 +95,21 @@ class DrawerSvg extends Drawer {
     resize() {
         var modify = false;
         var { canvas, config, dom } = this;
-        if (dom.offsetWidth != canvas.width) {
+        // 处理画板 width
+        var width = (dom.scrollWidth || dom.offsetWidth);
+        var canvas_width= Number(( canvas.style.width + '').replace("px",""));
+        if (width != canvas_width) {
             modify = true;
-            config.width = dom.scrollWidth || dom.offsetWidth;
-            canvas.style.width = config.width + "px";
+            config.width = width;
+            canvas.style.width = width + "px";
         }
-        if (dom.offsetHeight != canvas.height) {
+         // 处理画板 width
+        var height = (dom.scrollHeight || dom.offsetHeight);
+        var canvas_height = Number(( canvas.style.height + '').replace("px",""));
+        if (height != canvas_height) {
             modify = true;
-            config.height = dom.scrollHeight || dom.offsetHeight;
-            canvas.style.height = config.height + "px";
+            config.height = height;
+            canvas.style.height = height + "px";
         }
         return modify;
     }
