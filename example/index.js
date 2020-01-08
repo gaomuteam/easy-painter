@@ -75,7 +75,9 @@
  	}];
 
  	paint.Paint = function (dom, history) {
- 		var drawer = new paint.Drawer(dom);
+		var drawer = new paint.Drawer(dom);
+		drawer.setStyle("stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:0;");
+
  		drawer.preview = function () {
  			drawer.disable();
  			if (drawer.menu) drawer.menu.disable();

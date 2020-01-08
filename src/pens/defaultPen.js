@@ -1,5 +1,9 @@
 // import pencil from './defaultPen.cur';
 
+
+import Optim from '../libs/Optim.js';
+const optimObj = new Optim();
+
 /**
  * 画笔构造函数
  * @param {function} render 渲染当前作画数据
@@ -19,6 +23,7 @@ function defaultPen(render, resolve) {
     this.end = function(bx, by, ex, ey) {
         li.push(ex);
         li.push(ey);
+        li = optimObj.filter(li);
         resolve(li);
     };
 }
